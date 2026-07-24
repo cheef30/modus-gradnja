@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stan — MODUS GRADNJA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav class="nav solid" id="nav">
+  <div class="nav-in">
+    <a class="logo" href="index.html">
+      <svg class="logo-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <path d="M4 27V11l12-7 12 7v16" stroke="#c8a86b" stroke-width="1.8" stroke-linejoin="round"/>
+        <path d="M11 27V17h10v10" stroke="#eceae5" stroke-width="1.6" stroke-linejoin="round"/>
+        <path d="M4 27h24" stroke="#c8a86b" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      MODUS <span>gradnja</span>
+    </a>
+    <button class="burger" id="burger" aria-label="Meni">☰</button>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html#o-nama">O nama</a>
+      <a href="index.html#stanovi">Stanovi</a>
+      <a href="index.html#projekti">Projekti</a>
+      <a href="index.html#kafic">Kafić</a>
+      <a href="index.html#perionica">Perionica</a>
+      <a href="index.html#kontakt">Kontakt</a>
+    </div>
+    <a class="nav-cta" href="index.html#stanovi">Svi stanovi</a>
+  </div>
+</nav>
+
+<main class="sp wrap" id="app"></main>
+
+<footer>
+  <div class="wrap">
+    <div class="f-bot" style="margin-top:0;border-top:0">
+      <span>© <span id="yr">2026</span> MODUS GRADNJA. Sva prava zadržana.</span>
+      <span>Demo prezentacija · podaci o stanovima su ilustrativni</span>
+    </div>
+  </div>
+</footer>
+
+<script src="data.js"></script>
+<script src="stan.js"></script>
+<script>
+(function(){
+  var burger=document.getElementById('burger'), links=document.getElementById('navLinks');
+  burger.onclick=function(){ links.classList.toggle('open'); };
+  document.getElementById('yr').textContent=new Date().getFullYear();
+})();
+</script>
+</body>
+</html>

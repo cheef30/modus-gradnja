@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MODUS GRADNJA — Gradimo prostore u kojima se živi</title>
+<meta name="description" content="MODUS GRADNJA — izgradnja stambeno-poslovnih objekata i prodaja stanova. Interaktivni 3D pregled objekta, izbor sprata i stana.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ============================== NAV ============================== -->
+<nav class="nav" id="nav">
+  <div class="nav-in">
+    <a class="logo" href="index.html">
+      <svg class="logo-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <path d="M4 27V11l12-7 12 7v16" stroke="#c8a86b" stroke-width="1.8" stroke-linejoin="round"/>
+        <path d="M11 27V17h10v10" stroke="#eceae5" stroke-width="1.6" stroke-linejoin="round"/>
+        <path d="M4 27h24" stroke="#c8a86b" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      MODUS <span>gradnja</span>
+    </a>
+    <button class="burger" id="burger" aria-label="Meni">☰</button>
+    <div class="nav-links" id="navLinks">
+      <a href="#o-nama">O nama</a>
+      <a href="#stanovi">Stanovi</a>
+      <a href="#projekti">Projekti</a>
+      <a href="#kafic">Kafić</a>
+      <a href="#perionica">Perionica</a>
+      <a href="#kontakt">Kontakt</a>
+    </div>
+    <a class="nav-cta" href="#stanovi">Pogledaj stanove</a>
+  </div>
+</nav>
+
+<!-- ============================== HERO ============================== -->
+<header class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-in wrap">
+    <p class="eyebrow">Izgradnja · Investicije · Prodaja stanova</p>
+    <h1>Gradimo prostore u kojima se <em>zaista živi</em>.</h1>
+    <p class="lead">
+      Od temelja do ključa u ruke. MODUS GRADNJA projektuje i gradi stambeno-poslovne objekte
+      po standardu koji ne pravi kompromis — kvalitet materijala, rokovi i pošten odnos prema kupcu.
+    </p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="#stanovi">Istraži zgradu u 3D
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+      <a class="btn btn-ghost" href="#kontakt">Zakaži razgledanje</a>
+    </div>
+    <div class="hero-stats">
+      <div><b>18+</b><span>godina iskustva</span></div>
+      <div><b>340+</b><span>predatih stanova</span></div>
+      <div><b>11</b><span>završenih objekata</span></div>
+      <div><b>100%</b><span>rokovi ispoštovani</span></div>
+    </div>
+  </div>
+  <div class="scroll-hint"><i></i>Skroluj</div>
+</header>
+
+<!-- ============================== O NAMA ============================== -->
+<section class="sec" id="o-nama">
+  <div class="wrap">
+    <div class="grid-2 rv">
+      <div>
+        <p class="eyebrow">O kompaniji</p>
+        <h2>Porodična firma sa<br>građevinskom disciplinom.</h2>
+      </div>
+      <div>
+        <p class="lead">
+          MODUS GRADNJA je građevinska kompanija specijalizovana za izgradnju stambeno-poslovnih
+          objekata i prodaju stanova iz sopstvene investicije. Radimo sve — od pripreme lokacije i
+          grube gradnje, do završnih radova, uređenja parterа i primopredaje ključeva.
+        </p>
+        <p class="lead">
+          Pored gradnje, u okviru naših objekata poslujemo i sa dva prateća sadržaja — kafićem i
+          samouslužnom autoperionicom — jer verujemo da kvalitetan objekat ne prestaje na ulaznim vratima.
+        </p>
+      </div>
+    </div>
+
+    <div class="cards rv">
+      <div class="card">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 21h18M5 21V7l7-4 7 4v14M10 21v-6h4v6"/></svg>
+        <h3>Sopstvena investicija</h3>
+        <p>Objekte gradimo za sebe i prodajemo direktno — bez posrednika, sa jasnom cenom i jednim sagovornikom od prvog dana.</p>
+      </div>
+      <div class="card">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 2l8 4v6c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10V6l8-4z"/><path d="M9 12l2.2 2.2L15.5 10"/></svg>
+        <h3>Materijali bez kompromisa</h3>
+        <p>Fasada sa 12 cm izolacije, alu-stolarija sa troslojnim staklom, podno grejanje i toplotna pumpa u standardnoj opremi.</p>
+      </div>
+      <div class="card">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
+        <h3>Rok je rok</h3>
+        <p>Dinamika radova je ugovorena i javna. Kupci prate napredak gradnje kroz mesečne izveštaje i foto-dokumentaciju.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== 3D KONFIGURATOR ============================== -->
+<section class="cfg sec" id="stanovi">
+  <div class="wrap">
+    <div class="cfg-head rv">
+      <div>
+        <p class="eyebrow">U prodaji — MODUS Rezidencija</p>
+        <h2>Izaberi sprat.<br>Izaberi svoj stan.</h2>
+      </div>
+      <p class="lead" style="max-width:40ch;margin:0">
+        Zavrti objekat, klikni na sprat koji te zanima, pa na stan — otvoriće se sve:
+        kvadratura, orijentacija, tlocrt i cena.
+      </p>
+    </div>
+
+    <div class="cfg-shell rv">
+      <!-- 3D scena -->
+      <div class="stage" id="stage">
+        <canvas id="scene"></canvas>
+        <div class="tooltip" id="tooltip"></div>
+
+        <div class="loader" id="loader">
+          <div class="bar"><i></i></div>
+          Učitavanje 3D modela
+        </div>
+
+        <div class="stage-overlay">
+          <div class="stage-top">
+            <div class="badge">
+              <b>MODUS Rezidencija</b> · P+7 · Kralja Petra bb
+            </div>
+            <div class="stage-btns">
+              <button class="sbtn" id="btnZoomIn" title="Približi">+</button>
+              <button class="sbtn" id="btnZoomOut" title="Udalji">−</button>
+              <button class="sbtn" id="btnReset" title="Resetuj pogled">⟲</button>
+            </div>
+          </div>
+          <div>
+            <div class="legend badge" style="display:inline-flex">
+              <span><i style="background:#4ade80"></i>Slobodan</span>
+              <span><i style="background:#f0b429"></i>Rezervisan</span>
+              <span><i style="background:#6f757e"></i>Prodat</span>
+              <span><i style="background:#c8a86b"></i>Poslovni prostor</span>
+            </div>
+            <div class="stage-hint" style="margin-top:10px">
+              Prevuci mišem za rotaciju · točkić za zumiranje · klik na sprat za pregled stanova
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- bocni panel -->
+      <aside class="panel">
+        <div class="panel-head" id="panelHead"></div>
+        <div class="panel-body" id="panelBody"></div>
+      </aside>
+    </div>
+
+    <p class="stage-hint rv" style="margin-top:18px">
+      Napomena: prikazani 3D model je demonstracioni. Po dostavljanju projektne dokumentacije
+      zamenjuje se tačnim modelom objekta sa realnim tlocrtima i renderima.
+    </p>
+  </div>
+</section>
+
+<!-- ============================== PROJEKTI ============================== -->
+<section class="sec" id="projekti">
+  <div class="wrap">
+    <p class="eyebrow rv">Reference</p>
+    <h2 class="rv">Objekti koje smo predali.</h2>
+    <div class="cards rv">
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="height:190px;background:linear-gradient(150deg,#26211a,#12100d)"></div>
+        <div style="padding:24px 26px 28px">
+          <h3>Rezidencija Centar</h3>
+          <p>P+5 · 46 stanova · završeno 2023.</p>
+        </div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="height:190px;background:linear-gradient(150deg,#1a2029,#0d1014)"></div>
+        <div style="padding:24px 26px 28px">
+          <h3>Vila blok Sever</h3>
+          <p>P+2 · 12 stanova · završeno 2024.</p>
+        </div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="height:190px;background:linear-gradient(150deg,#22201c,#100f0d)"></div>
+        <div style="padding:24px 26px 28px">
+          <h3>Poslovni objekat Jug</h3>
+          <p>P+1 · 1.400 m² · završeno 2025.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== KAFIĆ + PERIONICA ============================== -->
+<section class="sec-tight">
+  <div class="wrap">
+    <p class="eyebrow rv">U okviru naših objekata</p>
+    <h2 class="rv" style="margin-bottom:44px">Ne gradimo samo zgrade.</h2>
+
+    <div class="split rv" id="kafic">
+      <div class="vis vis-cafe">
+        <div class="ill">
+          <svg viewBox="0 0 120 100" fill="none" stroke="#c8a86b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M24 38h58v24a20 20 0 0 1-20 20H44a20 20 0 0 1-20-20V38z"/>
+            <path d="M82 44h10a11 11 0 0 1 0 22h-10"/>
+            <path d="M18 90h74" stroke-width="2.6"/>
+            <path d="M40 14c0 6-6 6-6 12M56 10c0 6-6 6-6 12M72 14c0 6-6 6-6 12" opacity=".65"/>
+          </svg>
+        </div>
+      </div>
+      <div class="txt">
+        <p class="eyebrow">Kafić MODUS</p>
+        <h3>Kafa u prizemlju zgrade koju smo sami sazidali.</h3>
+        <p>
+          Kafić u prizemlju MODUS Rezidencije radi od 7 do 23h. Specialty kafa, domaći kolači i
+          terasa okrenuta ka unutrašnjem bloku — mesto na kome se stanari upoznaju,
+          a kupci potpisuju ugovore.
+        </p>
+        <div class="tags">
+          <span class="tag">Radno vreme 07–23h</span>
+          <span class="tag">Specialty kafa</span>
+          <span class="tag">Natkrivena terasa</span>
+          <span class="tag">Besplatan Wi-Fi</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="split rv" id="perionica">
+      <div class="txt">
+        <p class="eyebrow">Samouslužna autoperionica</p>
+        <h3>Otvoreno 24/7, na dva koraka od zgrade.</h3>
+        <p>
+          Četiri boksa sa visokim pritiskom, aktivnom penom, programom za felne i usisivačima.
+          Plaćanje žetonom, karticom ili preko aplikacije. Nadstrešnica i osvetljenje
+          rade i kad je najgore vreme.
+        </p>
+        <div class="tags">
+          <span class="tag">4 boksa</span>
+          <span class="tag">24/7</span>
+          <span class="tag">Kartica i žeton</span>
+          <span class="tag">Usisivači</span>
+          <span class="tag">Program za felne</span>
+        </div>
+      </div>
+      <div class="vis vis-wash">
+        <div class="ill">
+          <svg viewBox="0 0 130 100" fill="none" stroke="#5aa0e0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 68h94M26 68V56l8-16h50l10 16v12"/>
+            <circle cx="42" cy="72" r="7"/><circle cx="92" cy="72" r="7"/>
+            <path d="M40 40l-4-12M62 36V22M86 40l6-14" opacity=".7"/>
+            <path d="M30 88c5-6 10-6 15 0s10 6 15 0 10-6 15 0 10 6 15 0" opacity=".55"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== KONTAKT ============================== -->
+<section class="sec contact" id="kontakt">
+  <div class="wrap">
+    <div class="grid-2 rv">
+      <div>
+        <p class="eyebrow">Kontakt</p>
+        <h2>Dogovorimo obilazak gradilišta.</h2>
+        <p class="lead" style="margin-top:20px">
+          Ostavite kontakt i javljamo se istog radnog dana. Bez pozivanja u prazno i bez pritiska —
+          samo konkretne informacije o stanovima, cenama i dinamici plaćanja.
+        </p>
+        <div style="margin-top:34px">
+          <div class="info-row">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
+            <div><b>Adresa</b><span>Kralja Petra bb, Srbija</span></div>
+          </div>
+          <div class="info-row">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 5c0 8.3 6.7 15 15 15v-3.2l-4-1.6-2.2 2.2A12.6 12.6 0 0 1 7.6 11.2L9.8 9 8.2 5H4z"/></svg>
+            <div><b>Telefon</b><span>+381 (0) 00 000 000</span></div>
+          </div>
+          <div class="info-row">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 7l8.5 6 8.5-6"/></svg>
+            <div><b>E-mail</b><span>prodaja@modusgradnja.rs</span></div>
+          </div>
+          <div class="info-row">
+            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"/></svg>
+            <div><b>Instagram</b><span><a href="https://www.instagram.com/modus_gradnja/" target="_blank" rel="noopener">@modus_gradnja</a></span></div>
+          </div>
+        </div>
+      </div>
+
+      <form class="form" id="leadForm" novalidate>
+        <div class="field"><label for="ime">Ime i prezime</label><input id="ime" name="ime" type="text" placeholder="Petar Petrović" required></div>
+        <div class="field"><label for="tel">Telefon</label><input id="tel" name="tel" type="tel" placeholder="06x xxx xxxx" required></div>
+        <div class="field full"><label for="mail">E-mail</label><input id="mail" name="mail" type="email" placeholder="vas@email.rs"></div>
+        <div class="field full"><label for="interes">Interesuje me</label>
+          <select id="interes" name="interes">
+            <option>Jednoiposoban stan</option>
+            <option>Dvosoban stan</option>
+            <option selected>Dvoiposoban stan</option>
+            <option>Trosoban stan</option>
+            <option>Četvorosoban / penthouse</option>
+            <option>Poslovni prostor</option>
+          </select>
+        </div>
+        <div class="field full"><label for="poruka">Poruka</label><textarea id="poruka" name="poruka" placeholder="Zanima me stan na višem spratu, orijentacija jug…"></textarea></div>
+        <button class="btn btn-primary full" type="submit" style="grid-column:1/-1;justify-content:center">Pošalji upit</button>
+        <p class="form-note" id="formNote">Demo forma — podaci se ne šalju nigde.</p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== FOOTER ============================== -->
+<footer>
+  <div class="wrap">
+    <div class="f-grid">
+      <div>
+        <a class="logo" href="index.html" style="margin-bottom:16px">
+          <svg class="logo-mark" viewBox="0 0 32 32" fill="none">
+            <path d="M4 27V11l12-7 12 7v16" stroke="#c8a86b" stroke-width="1.8" stroke-linejoin="round"/>
+            <path d="M11 27V17h10v10" stroke="#eceae5" stroke-width="1.6" stroke-linejoin="round"/>
+            <path d="M4 27h24" stroke="#c8a86b" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          MODUS <span>gradnja</span>
+        </a>
+        <p style="max-width:34ch">Građevinska kompanija — izgradnja stambeno-poslovnih objekata i prodaja stanova iz sopstvene investicije.</p>
+      </div>
+      <div>
+        <h4>Navigacija</h4>
+        <a href="#o-nama">O nama</a><a href="#stanovi">Stanovi</a><a href="#projekti">Projekti</a><a href="#kontakt">Kontakt</a>
+      </div>
+      <div>
+        <h4>Sadržaji</h4>
+        <a href="#kafic">Kafić MODUS</a><a href="#perionica">Autoperionica</a><a href="#stanovi">Poslovni prostori</a>
+      </div>
+      <div>
+        <h4>Pratite nas</h4>
+        <a href="https://www.instagram.com/modus_gradnja/" target="_blank" rel="noopener">Instagram</a>
+        <a href="#kontakt">Facebook</a><a href="#kontakt">Newsletter</a>
+      </div>
+    </div>
+    <div class="f-bot">
+      <span>© <span id="yr">2026</span> MODUS GRADNJA. Sva prava zadržana.</span>
+      <span>Demo prezentacija · izrada sajta u toku</span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="data.js"></script>
+<script src="app.js"></script>
+<script>
+/* --- nav, reveal, forma --- */
+(function(){
+  var nav=document.getElementById('nav');
+  function onScroll(){ nav.classList.toggle('solid', window.scrollY>40); }
+  window.addEventListener('scroll',onScroll); onScroll();
+
+  var burger=document.getElementById('burger'), links=document.getElementById('navLinks');
+  burger.onclick=function(){ links.classList.toggle('open'); };
+  [].forEach.call(links.querySelectorAll('a'),function(a){ a.onclick=function(){ links.classList.remove('open'); }; });
+
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  },{threshold:.12});
+  [].forEach.call(document.querySelectorAll('.rv'),function(el){ io.observe(el); });
+
+  document.getElementById('yr').textContent=new Date().getFullYear();
+
+  document.getElementById('leadForm').addEventListener('submit',function(e){
+    e.preventDefault();
+    var n=document.getElementById('formNote');
+    n.textContent='Hvala! Upit je zabeležen (demo — ne šalje se nigde).';
+    n.style.color='#4ade80';
+  });
+})();
+</script>
+</body>
+</html>
