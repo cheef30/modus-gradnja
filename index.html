@@ -110,12 +110,12 @@
   <div class="wrap">
     <div class="cfg-head rv">
       <div>
-        <p class="eyebrow">U prodaji — MODUS Rezidencija</p>
+        <p class="eyebrow">Novi objekat — u pripremi prodaje</p>
         <h2>Izaberi sprat.<br>Izaberi svoj stan.</h2>
       </div>
       <p class="lead" style="max-width:40ch;margin:0">
-        Zavrti objekat, klikni na sprat koji te zanima, pa na stan — otvoriće se sve:
-        kvadratura, orijentacija, tlocrt i cena.
+        Zavrti objekat, klikni na sprat koji te zanima, pa na stan — otvoriće se
+        struktura, kvadratura i sve površine iz projektne dokumentacije.
       </p>
     </div>
 
@@ -144,7 +144,7 @@
         <div class="stage-overlay">
           <div class="stage-top">
             <div class="badge">
-              <b>MODUS Rezidencija</b> · P+7 · Kralja Petra bb
+              <b>Novi stambeni objekat</b> · Pr+2+Pk · 63 stana
             </div>
             <div class="stage-btns">
               <button class="sbtn" id="btnZoomIn" title="Približi">+</button>
@@ -154,10 +154,9 @@
           </div>
           <div>
             <div class="legend badge" style="display:inline-flex">
-              <span><i style="background:#4ade80"></i>Slobodan</span>
-              <span><i style="background:#f0b429"></i>Rezervisan</span>
-              <span><i style="background:#6f757e"></i>Prodat</span>
-              <span><i style="background:#c8a86b"></i>Poslovni prostor</span>
+              <span><i style="background:#5aa0e0"></i>Dvosoban</span>
+              <span><i style="background:#c8a86b"></i>Trosoban</span>
+              <span><i style="background:#e0655a"></i>Četvorosoban</span>
             </div>
             <div class="stage-hint" style="margin-top:10px">
               Prevuci mišem za rotaciju · točkić za zumiranje · klik na sprat za pregled stanova
@@ -174,15 +173,15 @@
     </div>
 
     <p class="stage-hint rv" id="hint3d" style="margin-top:18px">
-      Napomena: prikazani 3D model je demonstracioni. Po dostavljanju projektne dokumentacije
-      zamenjuje se tačnim modelom objekta sa realnim tlocrtima i renderima.
+      Napomena: 3D model je šematski prikaz objekta. Strukture, kvadrature i sve površine
+      stanova preuzete su iz projektne dokumentacije investitora.
     </p>
 
     <div class="apt-cards-view" id="viewCards" hidden>
       <div class="apt-cards" id="aptCards"></div>
       <p class="stage-hint" style="margin-top:22px">
-        Napomena: fotografije su ilustrativne. Zamenjujemo ih realnim snimcima i renderima
-        po dostavljanju projektne dokumentacije.
+        Napomena: prikazi su ilustrativni. Kvadrature i strukture stanova preuzete su
+        iz projektne dokumentacije investitora.
       </p>
     </div>
   </div>
@@ -330,12 +329,11 @@
         <div class="field full"><label for="mail">E-mail</label><input id="mail" name="mail" type="email" placeholder="vas@email.rs"></div>
         <div class="field full"><label for="interes">Interesuje me</label>
           <select id="interes" name="interes">
-            <option>Jednoiposoban stan</option>
             <option>Dvosoban stan</option>
-            <option selected>Dvoiposoban stan</option>
-            <option>Trosoban stan</option>
-            <option>Četvorosoban / penthouse</option>
-            <option>Poslovni prostor</option>
+            <option selected>Trosoban stan</option>
+            <option>Četvorosoban stan</option>
+            <option>Duplex</option>
+            <option>Potkrovlje sa terasom</option>
           </select>
         </div>
         <div class="field full"><label for="poruka">Poruka</label><textarea id="poruka" name="poruka" placeholder="Zanima me stan na višem spratu, orijentacija jug…"></textarea></div>
