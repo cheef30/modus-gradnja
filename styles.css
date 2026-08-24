@@ -378,7 +378,14 @@ footer{border-top:1px solid var(--line);padding:56px 0 34px;background:#07080a}
 .pill.t3{background:rgba(224,101,90,.14);color:#e0655a}
 
 .unit-card.off{opacity:.32}
+.unit-card.hid{display:none}
 .unit-card .uc-price{font-size:13px}
+.show-more{
+  display:block;width:100%;margin-top:10px;padding:12px;border-radius:12px;
+  border:1px dashed var(--line-2);background:transparent;color:var(--muted);
+  font-size:13px;font-weight:500;cursor:pointer;transition:.2s;letter-spacing:.02em;
+}
+.show-more:hover{border-color:var(--accent);color:var(--accent)}
 
 /* ---------- povrsine po prostorijama (stan.html) ---------- */
 .roombars{display:flex;flex-direction:column;gap:13px}

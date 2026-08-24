@@ -1,4 +1,4 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    MODUS GRADNJA — 3D konfigurator stanova (realni objekat Pr+1+2+Pk, 63 stana)
    Three.js r128 — sopstvena kontrola kamere, bez OrbitControls.
 
@@ -505,7 +505,7 @@
         var a = pointers[ids[0]], b = pointers[ids[1]];
         var dist = Math.hypot(a.x - b.x, a.y - b.y);
         if (pinchStart === null) pinchStart = { d: dist, r: cam.tr };
-        cam.tr = clamp(pinchStart.r * (pinchStart.d / Math.max(dist, 1)), 30, 170);
+        cam.tr = clamp(pinchStart.r * (pinchStart.d / Math.max(dist, 1)), 30, 190);
         moved = true;
         invalidate();
         return;
@@ -540,15 +540,15 @@
 
     canvas.addEventListener('wheel', function (e) {
       e.preventDefault();
-      cam.tr = clamp(cam.tr + e.deltaY * 0.05, 30, 170);
+      cam.tr = clamp(cam.tr + e.deltaY * 0.05, 30, 190);
       invalidate();
     }, { passive: false });
 
     var zi = document.getElementById('btnZoomIn'),
         zo = document.getElementById('btnZoomOut'),
         rs = document.getElementById('btnReset');
-    if (zi) zi.onclick = function () { cam.tr = clamp(cam.tr - 10, 30, 170); invalidate(); };
-    if (zo) zo.onclick = function () { cam.tr = clamp(cam.tr + 10, 30, 170); invalidate(); };
+    if (zi) zi.onclick = function () { cam.tr = clamp(cam.tr - 10, 30, 190); invalidate(); };
+    if (zo) zo.onclick = function () { cam.tr = clamp(cam.tr + 10, 30, 190); invalidate(); };
     if (rs) rs.onclick = function () { selectFloor(null); resetView(); };
   }
 
@@ -589,6 +589,12 @@
   }
 
   function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
+  /* radius sa kog cela duzina lamele (+ margina u metrima) stane u kadar */
+  function fitRadius(margin) {
+    var halfH = Math.atan(Math.tan(camera.fov * Math.PI / 360) * camera.aspect);
+    return (L / 2 + margin) / Math.tan(halfH);
+  }
 
   /* =========================================================== RAYCAST */
   function hoverTest(px, py) {
@@ -740,9 +746,10 @@
       renderFloorList();
     } else {
       var f = M.getFloor(key);
-      /* pticja perspektiva: cela lamela u kadru, osnova sprata citljiva */
+      /* pticja perspektiva: radius se racuna iz sirine kadra,
+         tako da cela lamela + margina uvek stane na ekran */
       cam.ttarget.set(0, f.level * FH + 1.6, 0);
-      cam.tr = 86;
+      cam.tr = clamp(fitRadius(16), 105, 185);
       cam.tph = 0.62;
       /* blago okreni ka blizoj poduznoj fasadi da lamela lezi horizontalno */
       var TWO = Math.PI * 2;
@@ -827,13 +834,18 @@
       '<h3>' + f.count + ' stanova · ' + M.range(f) + '</h3>' +
       '<p>Klikni na stan u 3D prikazu, osnovi ili listi za detalje</p>';
 
+    /* filter sakriva nepoklapajuce; lista skracena na 4 + "Prikazi jos" */
+    var COLLAPSE = 4;
+    var shown = f.units.filter(function (u) {
+      return S.filter === 'all' || u.strukt.key === S.filter;
+    });
+
     var html = '<button class="back-link" id="backBtn">← Svi spratovi</button>';
     html += chipsHTML();
     html += miniPlanSVG(f);
     html += '<div class="unit-list">';
-    f.units.forEach(function (u) {
-      var match = (S.filter === 'all' || u.strukt.key === S.filter);
-      html += '<button class="unit-card' + (match ? '' : ' off') + '" data-id="' + u.id + '">' +
+    shown.forEach(function (u, i) {
+      html += '<button class="unit-card' + (i >= COLLAPSE ? ' hid' : '') + '" data-id="' + u.id + '">' +
         '<div class="uc-top"><b>Stan br. ' + u.num + '</b>' +
         '<span class="pill ' + u.strukt.key + '">' + u.strukt.label + (u.duplex ? ' · duplex' : '') + '</span></div>' +
         '<div class="uc-meta">' +
@@ -845,10 +857,21 @@
         '</button>';
     });
     html += '</div>';
+    if (shown.length > COLLAPSE) {
+      html += '<button class="show-more" id="showMore">Prikaži još ' + (shown.length - COLLAPSE) + ' stanova ↓</button>';
+    }
     panelEl.innerHTML = html;
     bindChips();
 
     document.getElementById('backBtn').onclick = function () { selectFloor(null); };
+
+    var sm = document.getElementById('showMore');
+    if (sm) sm.onclick = function () {
+      [].forEach.call(panelEl.querySelectorAll('.unit-card.hid'), function (el) {
+        el.classList.remove('hid');
+      });
+      sm.remove();
+    };
 
     [].forEach.call(panelEl.querySelectorAll('.unit-card'), function (b) {
       var id = b.getAttribute('data-id');
