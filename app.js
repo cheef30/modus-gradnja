@@ -307,6 +307,7 @@
       );
       glass.position.set(0, baseY + 1.68, 0);
       add(rec, glass);
+      rec.glass = glass;
 
       /* ugaone lamele */
       var finMat = mkMat({ color: COL.fin, roughness: 0.5, metalness: 0.3 });
@@ -382,6 +383,7 @@
         );
         ridge.position.set(0, baseY + FH + 1.95, 0);
         add(rec, ridge);
+        rec.roofMeshes = [roof, ridge];
       }
 
       /* nevidljivi hitbox za lak izbor sprata */
@@ -658,6 +660,8 @@
 
   /* ====================================================== STIL / STANJE */
   function applyStyles() {
+    var selF = (S.floor !== null) ? M.getFloor(S.floor) : null;
+
     M.floors.forEach(function (f) {
       var rec = floorObjects[f.key];
       var selected = (S.floor === f.key);
@@ -669,11 +673,25 @@
         var bo = mat.userData.baseOpacity;
         var wantT = dimmed ? true : mat.userData.baseTransparent;
         if (mat.transparent !== wantT) { mat.transparent = wantT; mat.needsUpdate = true; }
-        mat.opacity = dimmed ? bo * 0.1 : bo;
+        mat.opacity = dimmed ? bo * 0.08 : bo;
         mat.depthWrite = !dimmed;
       });
 
-      rec.group.userData.targetOffY = selected ? 1.8 : 0;
+      /* na izabranom spratu: staklo skoro providno, na PK skloni i krov,
+         da osnova sprata bude citljiva odozgo */
+      if (selected) {
+        if (rec.glass) rec.glass.material.opacity = 0.16;
+        if (rec.roofMeshes) rec.roofMeshes.forEach(function (rm) {
+          var mm = rm.material;
+          if (!mm.transparent) { mm.transparent = true; mm.needsUpdate = true; }
+          mm.opacity = 0.06;
+          mm.depthWrite = false;
+        });
+      }
+
+      /* "otvaranje" zgrade: spratovi IZNAD izabranog se podizu,
+         izabrani i oni ispod ostaju na mestu */
+      rec.group.userData.targetOffY = (selF && f.level > selF.level) ? 6.5 : 0;
 
       f.units.forEach(function (u) {
         var mesh = rec.units[u.id];
@@ -718,12 +736,21 @@
     if (key === null) {
       cam.ttarget.set(0, 7, 0);
       cam.tr = 96;
+      cam.tph = Math.PI * 0.36;
       renderFloorList();
     } else {
       var f = M.getFloor(key);
-      cam.ttarget.set(0, f.level * FH + 3.4, 0);
-      cam.tr = 62;
-      cam.tph = clamp(cam.tph, 0.85, 1.3);
+      /* pticja perspektiva: cela lamela u kadru, osnova sprata citljiva */
+      cam.ttarget.set(0, f.level * FH + 1.6, 0);
+      cam.tr = 86;
+      cam.tph = 0.62;
+      /* blago okreni ka blizoj poduznoj fasadi da lamela lezi horizontalno */
+      var TWO = Math.PI * 2;
+      var a = ((cam.tth % TWO) + TWO) % TWO;
+      var snaps = [0, Math.PI, TWO];
+      var best = snaps[0];
+      snaps.forEach(function (c) { if (Math.abs(a - c) < Math.abs(a - best)) best = c; });
+      cam.tth = cam.tth + (best - a);
       renderFloorDetail(key);
     }
     applyStyles();
