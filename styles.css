@@ -125,6 +125,53 @@ section{position:relative}
 /* ---------- konfigurator ---------- */
 .cfg{background:linear-gradient(180deg,#08090b,#0b0d11 40%,#08090b);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .cfg-head{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;flex-wrap:wrap;margin-bottom:34px}
+
+.view-toggle{display:inline-flex;gap:6px;padding:6px;border:1px solid var(--line);border-radius:999px;background:#0a0c0f;margin-bottom:28px}
+.vt-btn{
+  display:flex;align-items:center;gap:9px;padding:11px 20px;border-radius:999px;border:0;background:transparent;
+  color:var(--muted);font-size:13.5px;font-weight:500;letter-spacing:.01em;cursor:pointer;transition:.2s;font-family:inherit;
+}
+.vt-btn svg{width:17px;height:17px;flex:0 0 auto;opacity:.85}
+.vt-btn:hover{color:var(--txt)}
+.vt-btn.active{background:var(--accent);color:#12100b}
+.vt-btn.active svg{opacity:1}
+
+.apt-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.apt-card{
+  border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--panel);
+  transition:.25s;display:flex;flex-direction:column;
+}
+.apt-card:hover{border-color:var(--line-2);background:var(--panel-2);transform:translateY(-3px)}
+.apt-card .ac-img{
+  height:190px;position:relative;
+  background:linear-gradient(150deg,#1a1d22,#0c0d10);
+  display:flex;align-items:flex-end;justify-content:space-between;padding:14px 16px;
+}
+.apt-card .ac-img::after{
+  content:'';position:absolute;inset:0;
+  background-image:repeating-linear-gradient(115deg,rgba(255,255,255,.035) 0 2px,transparent 2px 26px);
+}
+.apt-card .ac-img svg{width:38px;height:38px;color:rgba(255,255,255,.18);position:relative;z-index:1}
+.apt-card .ac-tag{
+  position:relative;z-index:1;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
+  padding:4px 10px;border-radius:999px;font-weight:600;backdrop-filter:blur(6px);
+  background:rgba(10,11,13,.55);border:1px solid rgba(255,255,255,.1);
+}
+.apt-card .ac-body{padding:22px 24px 26px;flex:1;display:flex;flex-direction:column}
+.apt-card h3{font-size:17px;margin-bottom:4px}
+.apt-card .ac-sub{font-size:13px;color:var(--muted);margin-bottom:16px}
+.apt-card .ac-meta{display:flex;gap:16px;font-size:12.5px;color:var(--muted);flex-wrap:wrap;margin-bottom:18px}
+.apt-card .ac-price{margin-top:auto;display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding-top:16px;border-top:1px solid var(--line)}
+.apt-card .ac-price b{font-size:17px;color:var(--accent);font-weight:600}
+.apt-card .ac-price small{font-size:11px;color:var(--muted-2)}
+.apt-card .ac-cta{
+  margin-top:14px;display:block;text-align:center;padding:11px;border-radius:10px;
+  border:1px solid var(--line-2);color:var(--txt);font-size:13px;font-weight:500;
+  text-decoration:none;transition:.2s;
+}
+.apt-card .ac-cta:hover{border-color:var(--accent);color:var(--accent)}
+
+#view3d[hidden],.apt-cards-view[hidden]{display:none}
 .cfg-shell{
   display:grid;grid-template-columns:1fr 372px;gap:0;
   border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#0a0c0f;
@@ -336,7 +383,8 @@ footer{border-top:1px solid var(--line);padding:56px 0 34px;background:#07080a}
   .grid-2,.split{grid-template-columns:1fr;gap:34px}
   .split .txt{padding:34px 26px}
   .split .vis{min-height:220px}
-  .cards,.rel-grid,.gal{grid-template-columns:1fr}
+  .cards,.rel-grid,.gal,.apt-cards{grid-template-columns:1fr}
+  .view-toggle{width:100%;overflow-x:auto}
   .f-grid{grid-template-columns:1fr 1fr;gap:28px}
   .form{grid-template-columns:1fr}
   .sec{padding:74px 0}

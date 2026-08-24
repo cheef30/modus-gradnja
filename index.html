@@ -53,13 +53,12 @@
       <a class="btn btn-ghost" href="#kontakt">Zakaži razgledanje</a>
     </div>
     <div class="hero-stats">
-      <div><b>18+</b><span>godina iskustva</span></div>
-      <div><b>340+</b><span>predatih stanova</span></div>
-      <div><b>11</b><span>završenih objekata</span></div>
-      <div><b>100%</b><span>rokovi ispoštovani</span></div>
+      <div><b>13+</b><span>godina iskustva</span></div>
+      <div><b>100+</b><span>prodatih stanova</span></div>
+      <div><b>5</b><span>završenih objekata</span></div>
+      <div><b>100%</b><span>ispoštovani rokovi</span></div>
     </div>
   </div>
-  <div class="scroll-hint"><i></i>Skroluj</div>
 </header>
 
 <!-- ============================== O NAMA ============================== -->
@@ -68,17 +67,25 @@
     <div class="grid-2 rv">
       <div>
         <p class="eyebrow">O kompaniji</p>
-        <h2>Porodična firma sa<br>građevinskom disciplinom.</h2>
+        <h2>Gradimo domove u kojima<br>raste budućnost.</h2>
       </div>
       <div>
         <p class="lead">
-          MODUS GRADNJA je građevinska kompanija specijalizovana za izgradnju stambeno-poslovnih
-          objekata i prodaju stanova iz sopstvene investicije. Radimo sve — od pripreme lokacije i
-          grube gradnje, do završnih radova, uređenja parterа i primopredaje ključeva.
+          MODUS GRADNJA je investitorska kompanija specijalizovana za izgradnju stambenih, stambeno-poslovnih
+          i poslovnih objekata. Radimo sve, od pripreme lokacije i grube gradnje, do završnih radova, uređenja partera i primopredaje ključeva.
         </p>
         <p class="lead">
-          Pored gradnje, u okviru naših objekata poslujemo i sa dva prateća sadržaja — kafićem i
-          samouslužnom autoperionicom — jer verujemo da kvalitetan objekat ne prestaje na ulaznim vratima.
+          U okviru sedišta firme nalazi se poslovni centar Modus group, u kojem možete naći preko 10 kompanija iz različitih sfera.
+        </p>
+        <p class="lead" style="margin-top:20px">
+          <strong>U okviru poslovnog centra:</strong><br>
+          ✓ AlHerboLab<br>
+          ✓ Ciak auto<br>
+          ✓ Svetofor<br>
+          ✓ Henex tehnički pregled<br>
+          ✓ Tr Zvončica<br>
+          ✓ Kafe Moneta<br>
+          ✓ Samouslužna perionica Team car wash
         </p>
       </div>
     </div>
@@ -92,12 +99,12 @@
       <div class="card">
         <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 2l8 4v6c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10V6l8-4z"/><path d="M9 12l2.2 2.2L15.5 10"/></svg>
         <h3>Materijali bez kompromisa</h3>
-        <p>Fasada sa 12 cm izolacije, alu-stolarija sa troslojnim staklom, podno grejanje i toplotna pumpa u standardnoj opremi.</p>
+        <p>Centralno gradsko grejanje, granitna keramika, parketi najkvalitetnije proizvodnje — sve od materijala dugoga veka trajanja. Investicija koja se isplati.</p>
       </div>
       <div class="card">
         <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
         <h3>Rok je rok</h3>
-        <p>Dinamika radova je ugovorena i javna. Kupci prate napredak gradnje kroz mesečne izveštaje i foto-dokumentaciju.</p>
+        <p>Dinamika radova je ugovorena i javna. Kupcima je uvek dostupan uvid u napredak gradnje i u komunikaciji sa našim menadžerima prodaje pristup samom objektu.</p>
       </div>
     </div>
   </div>
@@ -117,7 +124,18 @@
       </p>
     </div>
 
-    <div class="cfg-shell rv">
+    <div class="view-toggle rv" role="tablist" aria-label="Prikaz objekta">
+      <button class="vt-btn active" id="viewBtn3d" data-view="3d" role="tab" aria-selected="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z"/><path d="M12 3v18M4 7.5l8 4.5 8-4.5"/></svg>
+        3D prikaz zgrade
+      </button>
+      <button class="vt-btn" id="viewBtnCards" data-view="cards" role="tab" aria-selected="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="6" height="16" rx="1.5"/><rect x="10.5" y="4" width="6" height="16" rx="1.5"/><rect x="18" y="4" width="3" height="16" rx="1.5"/></svg>
+        Izdvojeni stanovi
+      </button>
+    </div>
+
+    <div class="cfg-shell rv" id="view3d">
       <!-- 3D scena -->
       <div class="stage" id="stage">
         <canvas id="scene"></canvas>
@@ -160,10 +178,18 @@
       </aside>
     </div>
 
-    <p class="stage-hint rv" style="margin-top:18px">
+    <p class="stage-hint rv" id="hint3d" style="margin-top:18px">
       Napomena: prikazani 3D model je demonstracioni. Po dostavljanju projektne dokumentacije
       zamenjuje se tačnim modelom objekta sa realnim tlocrtima i renderima.
     </p>
+
+    <div class="apt-cards-view" id="viewCards" hidden>
+      <div class="apt-cards" id="aptCards"></div>
+      <p class="stage-hint" style="margin-top:22px">
+        Napomena: fotografije su ilustrativne. Zamenjujemo ih realnim snimcima i renderima
+        po dostavljanju projektne dokumentacije.
+      </p>
+    </div>
   </div>
 </section>
 
@@ -174,24 +200,31 @@
     <h2 class="rv">Objekti koje smo predali.</h2>
     <div class="cards rv">
       <div class="card" style="padding:0;overflow:hidden">
-        <div style="height:190px;background:linear-gradient(150deg,#26211a,#12100d)"></div>
+        <img src="img/Vojvode%20Misica%20113.jpeg" style="width:100%;height:280px;object-fit:contain;background:#0d1014;display:block" alt="Vojvode Mišića 113">
         <div style="padding:24px 26px 28px">
-          <h3>Rezidencija Centar</h3>
-          <p>P+5 · 46 stanova · završeno 2023.</p>
+          <h3>Vojvode Mišića 113</h3>
+          <p>Pod+Pr+3+Pk · završeno 2020.</p>
         </div>
       </div>
       <div class="card" style="padding:0;overflow:hidden">
-        <div style="height:190px;background:linear-gradient(150deg,#1a2029,#0d1014)"></div>
+        <img src="img/Majora%20Nebojse%20Tepavca%2043.jpeg" style="width:100%;height:280px;object-fit:contain;background:#0d1014;display:block" alt="Majora Nebojše Tepavca 43">
         <div style="padding:24px 26px 28px">
-          <h3>Vila blok Sever</h3>
-          <p>P+2 · 12 stanova · završeno 2024.</p>
+          <h3>Majora Nebojše Tepavca 43</h3>
+          <p>Pr+2+Pk · završeno 2021.</p>
         </div>
       </div>
       <div class="card" style="padding:0;overflow:hidden">
-        <div style="height:190px;background:linear-gradient(150deg,#22201c,#100f0d)"></div>
+        <img src="img/Majora%20Nebojse%20Tepavca%203.jpeg" style="width:100%;height:280px;object-fit:contain;background:#0d1014;display:block" alt="Majora Nebojše Tepavca 4">
         <div style="padding:24px 26px 28px">
-          <h3>Poslovni objekat Jug</h3>
-          <p>P+1 · 1.400 m² · završeno 2025.</p>
+          <h3>Majora Nebojše Tepavca 4</h3>
+          <p>Pr+3+Pk · završeno 2023.</p>
+        </div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <img src="img/Kneza%20Mihaila%2011.jpeg" style="width:100%;height:280px;object-fit:contain;background:#0d1014;display:block" alt="Kneza Mihaila 11">
+        <div style="padding:24px 26px 28px">
+          <h3>Kneza Mihaila 11</h3>
+          <p>Po+P+4 · završena 2025.</p>
         </div>
       </div>
     </div>
@@ -202,7 +235,7 @@
 <section class="sec-tight">
   <div class="wrap">
     <p class="eyebrow rv">U okviru naših objekata</p>
-    <h2 class="rv" style="margin-bottom:44px">Ne gradimo samo zgrade.</h2>
+    <h2 class="rv" style="margin-bottom:44px">Zgrada je tek početak.</h2>
 
     <div class="split rv" id="kafic">
       <div class="vis vis-cafe">
@@ -216,17 +249,20 @@
         </div>
       </div>
       <div class="txt">
-        <p class="eyebrow">Kafić MODUS</p>
-        <h3>Kafa u prizemlju zgrade koju smo sami sazidali.</h3>
+        <p class="eyebrow">Kafe Moneta</p>
+        <h3>Dok se auto registruje — kafa je na vama.</h3>
         <p>
-          Kafić u prizemlju MODUS Rezidencije radi od 7 do 23h. Specialty kafa, domaći kolači i
-          terasa okrenuta ka unutrašnjem bloku — mesto na kome se stanari upoznaju,
-          a kupci potpisuju ugovore.
+          Kafe Moneta se nalazi u krugu Modus group centra, na adresi Aleksandra Ace Simovića 92V.
+          Dok čekate tehnički pregled, registraciju ili pranje u laserskoj perionici, kod nas vas
+          čekaju vrhunske kafe, šejkovi, kolači i bogata ponuda pića i hrane.
+        </p>
+        <p>
+          Nema praznog čekanja — samo dobar razlog da pauza potraje malo duže.
         </p>
         <div class="tags">
-          <span class="tag">Radno vreme 07–23h</span>
-          <span class="tag">Specialty kafa</span>
-          <span class="tag">Natkrivena terasa</span>
+          <span class="tag">Vrhunske kafe</span>
+          <span class="tag">Šejkovi i kolači</span>
+          <span class="tag">Hrana i piće</span>
           <span class="tag">Besplatan Wi-Fi</span>
         </div>
       </div>
@@ -234,19 +270,22 @@
 
     <div class="split rv" id="perionica">
       <div class="txt">
-        <p class="eyebrow">Samouslužna autoperionica</p>
-        <h3>Otvoreno 24/7, na dva koraka od zgrade.</h3>
+        <p class="eyebrow">Samouslužna i laserska perionica</p>
+        <h3>Otvoreno 24/7, u krugu Modus group centra.</h3>
         <p>
-          Četiri boksa sa visokim pritiskom, aktivnom penom, programom za felne i usisivačima.
-          Plaćanje žetonom, karticom ili preko aplikacije. Nadstrešnica i osvetljenje
-          rade i kad je najgore vreme.
+          Sedam boksova sa visokim pritiskom, aktivnom penom, podnim pranjem i usisivačima —
+          uz lasersku perionicu za one koji žele da posao odrade umesto njih.
+        </p>
+        <p>
+          Peremo prirodnom hemijom vrhunskog kvaliteta: bezbedna za vas, bezbedna za lak vašeg auta.
         </p>
         <div class="tags">
-          <span class="tag">4 boksa</span>
+          <span class="tag">7 boksova</span>
           <span class="tag">24/7</span>
-          <span class="tag">Kartica i žeton</span>
+          <span class="tag">Laserska perionica</span>
+          <span class="tag">Prirodna hemija</span>
+          <span class="tag">Podno pranje</span>
           <span class="tag">Usisivači</span>
-          <span class="tag">Program za felne</span>
         </div>
       </div>
       <div class="vis vis-wash">
@@ -276,16 +315,12 @@
         </p>
         <div style="margin-top:34px">
           <div class="info-row">
-            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
-            <div><b>Adresa</b><span>Kralja Petra bb, Srbija</span></div>
-          </div>
-          <div class="info-row">
             <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 5c0 8.3 6.7 15 15 15v-3.2l-4-1.6-2.2 2.2A12.6 12.6 0 0 1 7.6 11.2L9.8 9 8.2 5H4z"/></svg>
-            <div><b>Telefon</b><span>+381 (0) 00 000 000</span></div>
+            <div><b>Telefon</b><span>060/6002428<br>064/6577756</span></div>
           </div>
           <div class="info-row">
             <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 7l8.5 6 8.5-6"/></svg>
-            <div><b>E-mail</b><span>prodaja@modusgradnja.rs</span></div>
+            <div><b>E-mail</b><span>office.modusgradnja@gmail.com</span></div>
           </div>
           <div class="info-row">
             <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"/></svg>

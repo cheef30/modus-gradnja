@@ -85,6 +85,68 @@
     var ld = document.getElementById('loader');
     if (ld) { ld.classList.add('hide'); }
     animate();
+
+    bindViewToggle();
+    renderApartmentCards();
+  }
+
+  /* ======================================================= PRIKAZ / TAB */
+  function bindViewToggle() {
+    var btn3d = document.getElementById('viewBtn3d');
+    var btnCards = document.getElementById('viewBtnCards');
+    var view3d = document.getElementById('view3d');
+    var viewCards = document.getElementById('viewCards');
+    var hint3d = document.getElementById('hint3d');
+    if (!btn3d || !btnCards) return;
+
+    function showView(v) {
+      var is3d = v === '3d';
+      btn3d.classList.toggle('active', is3d);
+      btnCards.classList.toggle('active', !is3d);
+      btn3d.setAttribute('aria-selected', is3d);
+      btnCards.setAttribute('aria-selected', !is3d);
+      view3d.hidden = !is3d;
+      viewCards.hidden = is3d;
+      if (hint3d) hint3d.hidden = !is3d;
+    }
+
+    btn3d.onclick = function () { showView('3d'); };
+    btnCards.onclick = function () { showView('cards'); };
+  }
+
+  /* ======================================================== KARTICE STANOVA */
+  var ICON_HOME =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">' +
+    '<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M10 19.5v-6h4v6"/></svg>';
+
+  function renderApartmentCards() {
+    var host = document.getElementById('aptCards');
+    if (!host) return;
+
+    var ids = ['S3-A', 'S2-B', 'S6-D'];
+    var html = '';
+    ids.forEach(function (id) {
+      var u = M.getUnit(id);
+      if (!u) return;
+      var sold = u.status === 'prodat';
+      html += '<div class="apt-card">' +
+        '<div class="ac-img">' + ICON_HOME +
+        '<span class="ac-tag pill ' + u.status + '">' + M.STATUS_LABEL[u.status] + '</span>' +
+        '</div>' +
+        '<div class="ac-body">' +
+        '<h3>Stan ' + u.key + ' · ' + u.typeLabel + '</h3>' +
+        '<p class="ac-sub">' + u.floorLabel + ' · ' + u.orient + '</p>' +
+        '<div class="ac-meta">' +
+        '<span>' + u.area + ' m²</span>' +
+        '<span>' + u.rooms.toFixed(1) + ' sobe</span>' +
+        '<span>' + u.view + '</span>' +
+        '</div>' +
+        (sold ? '<div class="ac-price"><b>Prodato</b></div>' :
+          '<div class="ac-price"><b>' + M.price(u.price) + '</b><small>' + M.num(u.pricePerM2) + ' €/m²</small></div>') +
+        '<a class="ac-cta" href="stan.html?id=' + encodeURIComponent(u.id) + '">Pogledaj tlocrt i detalje</a>' +
+        '</div></div>';
+    });
+    host.innerHTML = html;
   }
 
   /* ============================================================== SVETLA */
