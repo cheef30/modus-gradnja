@@ -34,29 +34,14 @@
 
   document.title = 'Stan br. ' + u.num + ' · ' + u.etazaNaziv + ' — MODUS GRADNJA';
 
-  /* --------------------------------------------- povrsine po prostorijama */
-  function roomBars(unit) {
-    var max = Math.max.apply(null, unit.rooms.map(function (r) { return r.a; }));
-    var s = '<div class="roombars">';
-    unit.rooms.forEach(function (r) {
-      var pct = Math.max(6, (r.a / max) * 100);
-      var name = r.n.charAt(0).toUpperCase() + r.n.slice(1);
-      s += '<div class="rb-row">' +
-        '<span class="rb-name">' + name + '</span>' +
-        '<span class="rb-track"><i style="width:' + pct.toFixed(1) + '%"></i></span>' +
-        '<span class="rb-val">' + M.a2(r.a) + ' m²</span>' +
-        '</div>';
-    });
-    if (unit.terasa) {
-      var tp = Math.max(6, (unit.terasa / max) * 100);
-      s += '<div class="rb-row rb-ter">' +
-        '<span class="rb-name">Terasa</span>' +
-        '<span class="rb-track"><i style="width:' + Math.min(tp, 100).toFixed(1) + '%"></i></span>' +
-        '<span class="rb-val">' + M.a2(unit.terasa) + ' m²</span>' +
-        '</div>';
-    }
-    s += '</div>';
-    return s;
+  /* ------------------------------------------ prodajni list (slika) ----- */
+  var SHEET_DIR = 'img/stanovi-web/';
+  function sheetHTML(unit) {
+    var src = SHEET_DIR + unit.list;
+    return '<a class="sheet-box" href="' + src + '" target="_blank" rel="noopener" ' +
+      'title="Otvori prodajni list u punoj veličini">' +
+      '<img src="' + src + '" alt="Stan br. ' + unit.num + ' — prodajni list sa tlocrtom" loading="lazy">' +
+      '</a>';
   }
 
   /* ------------------------------------------------- presek zgrade ------ */
@@ -100,10 +85,10 @@
 
   html += '<div class="sp-grid">';
 
-  /* leva kolona — struktura stana */
+  /* leva kolona — prodajni list stana */
   html += '<div>' +
-    '<p class="eyebrow">Struktura stana</p>' +
-    '<div class="plan-box">' + roomBars(u) + '</div>' +
+    '<p class="eyebrow">Prikaz i tlocrt stana</p>' +
+    sheetHTML(u) +
     '<div class="plan-legend">' +
       '<span>Zatvoreno ' + M.a2(u.zatvoreno) + ' m²</span>' +
       (u.terasa ? '<span>Terasa ' + M.a2(u.terasa) + ' m²</span>' : '') +
@@ -114,9 +99,8 @@
       ? '<p style="font-size:13.5px;color:var(--muted);margin-top:18px">' +
         'Stan se prostire na dva nivoa, povezana unutrašnjim stepeništem.</p>'
       : '') +
-    '<p style="font-size:12.5px;color:var(--muted-2);margin-top:22px">' +
-      'Površine su preuzete iz projektne dokumentacije investitora. ' +
-      'Detaljan tlocrt stana dostavljamo na upit.</p>' +
+    '<p style="font-size:12.5px;color:var(--muted-2);margin-top:18px">' +
+      'Klikni na sliku za prodajni list u punoj veličini.</p>' +
     '</div>';
 
   /* desna kolona — specifikacija + kontakt */
@@ -136,8 +120,7 @@
     '</div>' +
     '<div class="cta-row">' +
       '<a class="btn btn-primary" href="' + TEL_1_HREF + '">Pozovi ' + TEL_1 + '</a>' +
-      '<a class="btn btn-ghost" href="mailto:' + MAIL + '?subject=' +
-        encodeURIComponent('Upit za stan br. ' + u.num + ' (' + u.id + ')') + '">Pošalji upit mejlom</a>' +
+      '<a class="btn btn-ghost" href="#upit">Pošalji upit</a>' +
     '</div>' +
     '<div class="mini-bldg"><div class="mt">Pozicija u objektu</div>' + buildingSVG(u.etaza) + '</div>' +
     '<div class="mini-bldg">' +
@@ -174,9 +157,51 @@
     html += '</div></section>';
   }
 
+  /* ------------------------------------------------ kontakt forma ------- */
+  html += '<section class="related" id="upit">' +
+    '<p class="eyebrow">Kontakt</p>' +
+    '<h2 style="font-size:30px">Zakažite obilazak stana br. ' + u.num + '.</h2>' +
+    '<p class="lead" style="margin-top:14px">Ostavite podatke i javljamo se istog radnog dana — ' +
+    'ili nas pozovite direktno na <a href="' + TEL_1_HREF + '" style="color:var(--accent)">' + TEL_1 + '</a>.</p>' +
+    '<form class="form" id="unitForm" novalidate style="margin-top:30px;max-width:760px">' +
+      '<div class="field"><label for="uIme">Ime i prezime</label>' +
+        '<input id="uIme" type="text" placeholder="Petar Petrović" required></div>' +
+      '<div class="field"><label for="uTel">Telefon</label>' +
+        '<input id="uTel" type="tel" placeholder="06x xxx xxxx" required></div>' +
+      '<div class="field full"><label for="uMsg">Poruka</label>' +
+        '<textarea id="uMsg">Zdravo, zanima me stan br. ' + u.num + ' (' + u.strukt.label.toLowerCase() +
+        ', ' + M.a2(u.ukupno) + ' m², ' + u.etazaNaziv.toLowerCase() + '). Molim vas da me kontaktirate.</textarea></div>' +
+      '<button class="btn btn-primary" type="submit" style="grid-column:1/-1;justify-content:center">Pošalji upit</button>' +
+      '<p class="form-note" id="uNote">Upit se šalje na ' + MAIL + ' preko vašeg email programa.</p>' +
+    '</form>' +
+    '</section>';
+
   app.innerHTML = html;
 
   function row(k, v) {
     return '<div class="r"><span>' + k + '</span><b>' + v + '</b></div>';
+  }
+
+  /* slanje upita — otvara email program sa popunjenom porukom */
+  var uf = document.getElementById('unitForm');
+  if (uf) {
+    uf.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var ime = (document.getElementById('uIme').value || '').trim();
+      var tel = (document.getElementById('uTel').value || '').trim();
+      var msg = (document.getElementById('uMsg').value || '').trim();
+      var note = document.getElementById('uNote');
+      if (!ime || !tel) {
+        note.textContent = 'Molimo unesite ime i broj telefona.';
+        note.style.color = '#e0655a';
+        return;
+      }
+      var body = msg + '\n\nIme i prezime: ' + ime + '\nTelefon: ' + tel;
+      window.location.href = 'mailto:' + MAIL +
+        '?subject=' + encodeURIComponent('Upit za stan br. ' + u.num + ' (' + u.id + ')') +
+        '&body=' + encodeURIComponent(body);
+      note.textContent = 'Otvara se vaš email program… Ako se ne otvori, pozovite ' + TEL_1 + '.';
+      note.style.color = '#4ade80';
+    });
   }
 })();

@@ -380,6 +380,14 @@ footer{border-top:1px solid var(--line);padding:56px 0 34px;background:#07080a}
 .unit-card.off{opacity:.32}
 .unit-card .uc-price{font-size:13px}
 
+/* ---------- prodajni list stana (stan.html) ---------- */
+.sheet-box{
+  display:block;background:#fff;border:1px solid var(--line);border-radius:16px;
+  overflow:hidden;transition:.25s;
+}
+.sheet-box img{width:100%;display:block}
+.sheet-box:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 24px 60px -30px rgba(0,0,0,.8)}
+
 /* ---------- povrsine po prostorijama (stan.html) ---------- */
 .roombars{display:flex;flex-direction:column;gap:13px}
 .rb-row{display:grid;grid-template-columns:150px 1fr 74px;align-items:center;gap:14px}
