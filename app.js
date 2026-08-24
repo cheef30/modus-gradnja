@@ -281,13 +281,15 @@
       slab.castShadow = true; slab.receiveShadow = true;
       add(rec, slab);
 
-      /* stanovi — segmenti duz lamele, juzni i severni niz */
+      /* stanovi — pozicije ocitane iz osnova (jug / sever / pun gabarit) */
       f.units.forEach(function (u) {
         var w = u.lw * fw - GAP;
         var x = -fw / 2 + (u.lx + u.lw / 2) * fw;
-        var z = (u.side === 'S' ? 1 : -1) * (CORR / 2 + unitD / 2);
+        var full = (u.side === 'F');
+        var d = full ? (fd - 0.1) : (unitD - 0.1);
+        var z = full ? 0 : (u.side === 'S' ? 1 : -1) * (CORR / 2 + unitD / 2);
         var mat = mkMat({ color: COL.unit, roughness: 0.62, metalness: 0.1, emissive: 0x000000 });
-        var mesh = new THREE.Mesh(new THREE.BoxGeometry(Math.max(w, 0.5), unitH, unitD - 0.1), mat);
+        var mesh = new THREE.Mesh(new THREE.BoxGeometry(Math.max(w, 0.5), unitH, d), mat);
         mesh.position.set(x, baseY + 0.28 + unitH / 2, z);
         mesh.castShadow = true; mesh.receiveShadow = true;
         mesh.userData = { unitId: u.id, floorKey: f.key, pick: true };
@@ -295,6 +297,19 @@
         rec.units[u.id] = mesh;
         unitMeshes.push(mesh);
       });
+
+      /* prizemlje: garaze na istocnom kraju juzne strane (mesta 49-53) */
+      if (f.key === 'PR') {
+        var gw = (1.0 - 0.894) * fw - GAP;
+        var gx = -fw / 2 + ((0.894 + 1.0) / 2) * fw;
+        var gar = new THREE.Mesh(
+          new THREE.BoxGeometry(gw, unitH * 0.9, unitD - 0.1),
+          mkMat({ color: 0x1a1c20, roughness: 0.85 })
+        );
+        gar.position.set(gx, baseY + 0.28 + unitH * 0.45, CORR / 2 + unitD / 2);
+        gar.castShadow = true; gar.receiveShadow = true;
+        add(rec, gar);
+      }
 
       /* trakasto staklo oko etaze */
       var glass = new THREE.Mesh(
@@ -341,15 +356,17 @@
 
       /* prizemlje: ulazna nadstresnica na jugu (centar) */
       if (f.key === 'PR') {
+        /* ulaz je na ~48% duzine lamele (izmedju stana 01 i 15) */
+        var ex = (0.48 - 0.5) * L;
         var can = new THREE.Mesh(
-          new THREE.BoxGeometry(7, 0.18, 2.6),
+          new THREE.BoxGeometry(6, 0.18, 2.6),
           mkMat({ color: COL.fin, roughness: 0.6, metalness: 0.2 })
         );
-        can.position.set(0, baseY + 2.7, DEP / 2 + 1.3);
+        can.position.set(ex, baseY + 2.7, DEP / 2 + 1.3);
         can.castShadow = true;
         add(rec, can);
         var colMat = mkMat({ color: 0x3c4045, roughness: 0.6, metalness: 0.25 });
-        [-2.8, 2.8].forEach(function (cx) {
+        [ex - 2.4, ex + 2.4].forEach(function (cx) {
           var c = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 2.6, 8), colMat);
           c.position.set(cx, baseY + 1.3, DEP / 2 + 2.1);
           c.castShadow = true;
@@ -879,16 +896,32 @@
     s += '<rect x="-2" y="-2" width="' + (W + 4) + '" height="' + (H + 4) + '" rx="4" fill="none" stroke="rgba(255,255,255,.14)" stroke-dasharray="4 4"/>';
     f.units.forEach(function (u) {
       var x = u.lx * W, w = u.lw * W;
-      var y = (u.side === 'N') ? 0 : rowH + corr;
+      var full = (u.side === 'F');
+      var y = full ? 0 : (u.side === 'N' ? 0 : rowH + corr);
+      var h = full ? (rowH * 2 + corr) : rowH;
       var c = u.strukt.color;
       s += '<g class="u" data-id="' + u.id + '">' +
-        '<rect x="' + (x + 1) + '" y="' + y + '" width="' + (w - 2) + '" height="' + rowH + '" rx="3" ' +
+        '<rect x="' + (x + 1) + '" y="' + y + '" width="' + (w - 2) + '" height="' + h + '" rx="3" ' +
         'fill="' + c + '" fill-opacity="0.13" stroke="' + c + '" stroke-opacity="0.7" stroke-width="1.1"/>' +
-        '<text x="' + (x + w / 2) + '" y="' + (y + rowH / 2 - 2) + '" text-anchor="middle" ' +
+        '<text x="' + (x + w / 2) + '" y="' + (y + h / 2 - 2) + '" text-anchor="middle" ' +
         'font-size="10" font-weight="600" fill="' + c + '">' + u.num + '</text>' +
-        '<text x="' + (x + w / 2) + '" y="' + (y + rowH / 2 + 11) + '" text-anchor="middle" ' +
+        '<text x="' + (x + w / 2) + '" y="' + (y + h / 2 + 11) + '" text-anchor="middle" ' +
         'font-size="7.5" fill="rgba(255,255,255,.45)">' + Math.round(u.ukupno) + ' m²</text></g>';
     });
+    /* ulaz / stepenisni blok u juznom nizu */
+    var coreX0 = (f.key === 'PR' ? 0.416 : 0.445) * W, coreX1 = 0.516 * W;
+    s += '<rect x="' + (coreX0 + 1) + '" y="' + (rowH + corr) + '" width="' + (coreX1 - coreX0 - 2) + '" height="' + rowH + '" rx="3" ' +
+      'fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.18)" stroke-dasharray="3 3" stroke-width="1"/>' +
+      '<text x="' + ((coreX0 + coreX1) / 2) + '" y="' + (rowH + corr + rowH / 2 + 2) + '" text-anchor="middle" ' +
+      'font-size="6.5" fill="rgba(255,255,255,.4)">ULAZ</text>';
+    /* garaze na PR */
+    if (f.key === 'PR') {
+      var gx0 = 0.894 * W;
+      s += '<rect x="' + (gx0 + 1) + '" y="' + (rowH + corr) + '" width="' + (W - gx0 - 2) + '" height="' + rowH + '" rx="3" ' +
+        'fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.18)" stroke-dasharray="3 3" stroke-width="1"/>' +
+        '<text x="' + ((gx0 + W) / 2) + '" y="' + (rowH + corr + rowH / 2 + 2) + '" text-anchor="middle" ' +
+        'font-size="6.5" fill="rgba(255,255,255,.4)">GARAŽE</text>';
+    }
     s += '<rect x="0" y="' + rowH + '" width="' + W + '" height="' + corr + '" fill="rgba(255,255,255,.05)"/>';
     s += '<text x="' + (W - 2) + '" y="' + (H + 14) + '" text-anchor="end" font-size="7" fill="rgba(255,255,255,.3)">JUG ↓</text>';
     s += '</svg></div>';

@@ -172,24 +172,53 @@ window.MODUS_DATA = {
   });
 
   /* ------------------------------- raspored duz lamele (0..1 po duzini) --
-     Jedinice se naizmenicno redjaju na juznu (S) i severnu (N) stranu
-     centralnog hodnika; sirina segmenta je proporcionalna povrsini.
-     Ovaj isti raspored koriste 3D model i mini-osnova, pa se uvek slazu.  */
+     Pozicije OCITANE iz osnova etaza u projektnoj dokumentaciji:
+     - zapadni ugao: stan punog gabarita (04/19/35/51)
+     - sever (leva->desna): slotovi N1..N8 (na PR stan 11 spaja N7+N8)
+     - jug: S1,S2,S3, [ulaz/stepeniste/lift], S4..S7
+     - na PR istocni kraj juzne strane zauzimaju garaze (br. 49-53)
+     Strane: S = jug (ulaz), N = sever, F = pun gabarit (ugaoni).         */
+  var SL = {
+    W:  [0.000, 0.138],
+    N1: [0.138, 0.276], N2: [0.276, 0.376], N3: [0.376, 0.469], N4: [0.469, 0.573],
+    N5: [0.573, 0.671], N6: [0.671, 0.768], N7: [0.768, 0.842], N8: [0.842, 1.000],
+    N78:[0.768, 1.000],
+    S1: [0.138, 0.213], S2: [0.213, 0.321], S3: [0.321, 0.445],
+    S4: [0.516, 0.600], S5: [0.600, 0.712], S6: [0.712, 0.815], S7: [0.815, 1.000]
+  };
+  var POS = {
+    /* prizemlje */
+    C04: ['W','F'],  C03: ['S1','S'], C02: ['S2','S'], C01: [[0.321,0.416],'S'],
+    C15: ['S4','S'], C14: ['S5','S'], C13: ['S6','S'], C12: [[0.815,0.894],'S'],
+    C05: ['N1','N'], C06: ['N2','N'], C07: ['N3','N'], C08: ['N4','N'],
+    C09: ['N5','N'], C10: ['N6','N'], C11: ['N78','N'],
+    /* prvi sprat */
+    C19: ['W','F'],  C18: ['S1','S'], C17: ['S2','S'], C16: ['S3','S'],
+    C31: ['S4','S'], C30: ['S5','S'], C29: ['S6','S'], C28: ['S7','S'],
+    C20: ['N1','N'], C21: ['N2','N'], C22: ['N3','N'], C23: ['N4','N'],
+    C24: ['N5','N'], C25: ['N6','N'], C26: ['N7','N'], C27: ['N8','N'],
+    /* drugi sprat */
+    C35: ['W','F'],  C34: ['S1','S'], C33: ['S2','S'], C32: ['S3','S'],
+    C47: ['S4','S'], C46: ['S5','S'], C45: ['S6','S'], C44: ['S7','S'],
+    C36: ['N1','N'], C37: ['N2','N'], C38: ['N3','N'], C39: ['N4','N'],
+    C40: ['N5','N'], C41: ['N6','N'], C42: ['N7','N'], C43: ['N8','N'],
+    /* potkrovlje */
+    C51: ['W','F'],  C50: ['S1','S'], C49: ['S2','S'], C48: ['S3','S'],
+    C63: ['S4','S'], C62: ['S5','S'], C61: ['S6','S'], C60: ['S7','S'],
+    C52: ['N1','N'], C53: ['N2','N'], C54: ['N3','N'], C55: ['N4','N'],
+    C56: ['N5','N'], C57: ['N6','N'], C58: ['N7','N'], C59: ['N8','N']
+  };
+
+  units.forEach(function (u) {
+    var p = POS[u.id];
+    var seg = (typeof p[0] === 'string') ? SL[p[0]] : p[0];
+    u.lx = seg[0];
+    u.lw = seg[1] - seg[0];
+    u.side = p[1];
+  });
+
   var floors = FLOOR_ORDER.map(function (k, li) {
     var us = units.filter(function (u) { return u.etaza === k; });
-    var rows = { S: [], N: [] };
-    us.forEach(function (u, i) { rows[i % 2 === 0 ? 'S' : 'N'].push(u); });
-    ['S', 'N'].forEach(function (rk) {
-      var row = rows[rk];
-      var tot = row.reduce(function (s, u) { return s + u.ukupno; }, 0) || 1;
-      var x = 0;
-      row.forEach(function (u) {
-        u.side = rk;
-        u.lx = x;
-        u.lw = u.ukupno / tot;
-        x += u.lw;
-      });
-    });
     var areas = us.map(function (u) { return u.ukupno; });
     return {
       key: k,
