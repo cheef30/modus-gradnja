@@ -834,8 +834,7 @@
       '<h3>' + f.count + ' stanova · ' + M.range(f) + '</h3>' +
       '<p>Klikni na stan u 3D prikazu, osnovi ili listi za detalje</p>';
 
-    /* filter sakriva nepoklapajuce; lista skracena na 4 + "Prikazi jos" */
-    var COLLAPSE = 4;
+    /* filter sakriva nepoklapajuce; lista skroluje unutar panela */
     var shown = f.units.filter(function (u) {
       return S.filter === 'all' || u.strukt.key === S.filter;
     });
@@ -844,8 +843,8 @@
     html += chipsHTML();
     html += miniPlanSVG(f);
     html += '<div class="unit-list">';
-    shown.forEach(function (u, i) {
-      html += '<button class="unit-card' + (i >= COLLAPSE ? ' hid' : '') + '" data-id="' + u.id + '">' +
+    shown.forEach(function (u) {
+      html += '<button class="unit-card" data-id="' + u.id + '">' +
         '<div class="uc-top"><b>Stan br. ' + u.num + '</b>' +
         '<span class="pill ' + u.strukt.key + '">' + u.strukt.label + (u.duplex ? ' · duplex' : '') + '</span></div>' +
         '<div class="uc-meta">' +
@@ -857,21 +856,10 @@
         '</button>';
     });
     html += '</div>';
-    if (shown.length > COLLAPSE) {
-      html += '<button class="show-more" id="showMore">Prikaži još ' + (shown.length - COLLAPSE) + ' stanova ↓</button>';
-    }
     panelEl.innerHTML = html;
     bindChips();
 
     document.getElementById('backBtn').onclick = function () { selectFloor(null); };
-
-    var sm = document.getElementById('showMore');
-    if (sm) sm.onclick = function () {
-      [].forEach.call(panelEl.querySelectorAll('.unit-card.hid'), function (el) {
-        el.classList.remove('hid');
-      });
-      sm.remove();
-    };
 
     [].forEach.call(panelEl.querySelectorAll('.unit-card'), function (b) {
       var id = b.getAttribute('data-id');

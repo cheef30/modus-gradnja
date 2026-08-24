@@ -217,7 +217,7 @@ section{position:relative}
 @keyframes slide{0%{transform:translateX(-100%)}100%{transform:translateX(330%)}}
 
 /* panel */
-.panel{background:#0b0d11;border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:640px}
+.panel{background:#0b0d11;border-left:1px solid var(--line);display:flex;flex-direction:column;height:640px}
 .panel-head{padding:24px 24px 18px;border-bottom:1px solid var(--line)}
 .panel-head .t{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
 .panel-head h3{font-size:20px}
@@ -378,14 +378,7 @@ footer{border-top:1px solid var(--line);padding:56px 0 34px;background:#07080a}
 .pill.t3{background:rgba(224,101,90,.14);color:#e0655a}
 
 .unit-card.off{opacity:.32}
-.unit-card.hid{display:none}
 .unit-card .uc-price{font-size:13px}
-.show-more{
-  display:block;width:100%;margin-top:10px;padding:12px;border-radius:12px;
-  border:1px dashed var(--line-2);background:transparent;color:var(--muted);
-  font-size:13px;font-weight:500;cursor:pointer;transition:.2s;letter-spacing:.02em;
-}
-.show-more:hover{border-color:var(--accent);color:var(--accent)}
 
 /* ---------- povrsine po prostorijama (stan.html) ---------- */
 .roombars{display:flex;flex-direction:column;gap:13px}
@@ -414,7 +407,7 @@ footer{border-top:1px solid var(--line);padding:56px 0 34px;background:#07080a}
 /* ---------- responsive ---------- */
 @media(max-width:1080px){
   .cfg-shell{grid-template-columns:1fr}
-  .panel{border-left:0;border-top:1px solid var(--line);min-height:auto;max-height:560px}
+  .panel{border-left:0;border-top:1px solid var(--line);height:auto;min-height:auto;max-height:560px}
   .stage{min-height:480px}
   .sp-grid{grid-template-columns:1fr;gap:36px}
   .sticky{position:static}
