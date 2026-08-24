@@ -333,7 +333,7 @@
         </div>
         <div class="field full"><label for="poruka">Poruka</label><textarea id="poruka" name="poruka" placeholder="Zanima me stan na višem spratu, orijentacija jug…"></textarea></div>
         <button class="btn btn-primary full" type="submit" style="grid-column:1/-1;justify-content:center">Pošalji upit</button>
-        <p class="form-note" id="formNote">Demo forma — podaci se ne šalju nigde.</p>
+        <p class="form-note" id="formNote">Javljamo se istog radnog dana. Radno vreme: 8–16h radnim danima.</p>
       </form>
     </div>
   </div>
@@ -393,9 +393,41 @@
 
   document.getElementById('leadForm').addEventListener('submit',function(e){
     e.preventDefault();
+    var f=e.target;
     var n=document.getElementById('formNote');
-    n.textContent='Hvala! Upit je zabeležen (demo — ne šalje se nigde).';
-    n.style.color='#4ade80';
+    var btn=f.querySelector('button[type=submit]');
+    var ime=(f.ime.value||'').trim(), tel=(f.tel.value||'').trim();
+    if(!ime||!tel){
+      n.textContent='Molimo unesite ime i broj telefona.';
+      n.style.color='#e0655a';
+      return;
+    }
+    btn.disabled=true; btn.textContent='Slanje…';
+    fetch('https://formsubmit.co/ajax/office.modusgradnja@gmail.com',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify({
+        _subject:'Upit sa sajta — '+(f.interes.value||'stanovi'),
+        _template:'table',
+        _captcha:'false',
+        'Ime i prezime':ime,
+        'Telefon':tel,
+        'E-mail':(f.mail.value||'').trim(),
+        'Interesuje me':f.interes.value,
+        'Poruka':(f.poruka.value||'').trim()
+      })
+    }).then(function(r){return r.json();}).then(function(d){
+      if(d&&(d.success==='true'||d.success===true)){
+        n.textContent='Hvala! Upit je poslat — javljamo se istog radnog dana.';
+        n.style.color='#4ade80';
+        f.reset();
+        btn.textContent='Upit poslat ✓';
+      }else{throw new Error('fs');}
+    }).catch(function(){
+      n.textContent='Slanje trenutno nije moguće — pozovite 060/6002428 ili pišite na office.modusgradnja@gmail.com.';
+      n.style.color='#e0655a';
+      btn.disabled=false; btn.textContent='Pošalji upit';
+    });
   });
 })();
 </script>

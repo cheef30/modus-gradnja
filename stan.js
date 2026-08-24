@@ -182,7 +182,7 @@
     return '<div class="r"><span>' + k + '</span><b>' + v + '</b></div>';
   }
 
-  /* slanje upita — otvara email program sa popunjenom porukom */
+  /* slanje upita — FormSubmit prosledjuje na mejl prodaje */
   var uf = document.getElementById('unitForm');
   if (uf) {
     uf.addEventListener('submit', function (e) {
@@ -191,17 +191,41 @@
       var tel = (document.getElementById('uTel').value || '').trim();
       var msg = (document.getElementById('uMsg').value || '').trim();
       var note = document.getElementById('uNote');
+      var btn = uf.querySelector('button[type=submit]');
       if (!ime || !tel) {
         note.textContent = 'Molimo unesite ime i broj telefona.';
         note.style.color = '#e0655a';
         return;
       }
-      var body = msg + '\n\nIme i prezime: ' + ime + '\nTelefon: ' + tel;
-      window.location.href = 'mailto:' + MAIL +
-        '?subject=' + encodeURIComponent('Upit za stan br. ' + u.num + ' (' + u.id + ')') +
-        '&body=' + encodeURIComponent(body);
-      note.textContent = 'Otvara se vaš email program… Ako se ne otvori, pozovite ' + TEL_1 + '.';
-      note.style.color = '#4ade80';
+      btn.disabled = true;
+      btn.textContent = 'Slanje…';
+      fetch('https://formsubmit.co/ajax/' + MAIL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          _subject: 'Upit za stan br. ' + u.num + ' (' + u.id + ')',
+          _template: 'table',
+          _captcha: 'false',
+          'Stan': 'br. ' + u.num + ' — ' + u.strukt.label + ', ' + M.a2(u.ukupno) + ' m², ' + u.etazaNaziv,
+          'Ime i prezime': ime,
+          'Telefon': tel,
+          'Poruka': msg
+        })
+      }).then(function (r) { return r.json(); }).then(function (d) {
+        if (d && (d.success === 'true' || d.success === true)) {
+          note.textContent = 'Hvala! Upit je poslat — javljamo se u najkraćem roku.';
+          note.style.color = '#4ade80';
+          uf.reset();
+          btn.textContent = 'Upit poslat ✓';
+        } else {
+          throw new Error('fs');
+        }
+      }).catch(function () {
+        note.textContent = 'Slanje trenutno nije moguće — pozovite ' + TEL_1 + ' ili pišite na ' + MAIL + '.';
+        note.style.color = '#e0655a';
+        btn.disabled = false;
+        btn.textContent = 'Pošalji upit';
+      });
     });
   }
 })();
