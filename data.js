@@ -197,53 +197,69 @@ window.MODUS_DATA = {
     };
   });
 
+  var byId = {};
+  units.forEach(function (u) { byId[u.id] = u; });
+
   /* ------------------------------- raspored duz lamele (0..1 po duzini) --
-     Pozicije OCITANE iz osnova etaza u projektnoj dokumentaciji:
-     - zapadni ugao: stan punog gabarita (04/19/35/51)
-     - sever (leva->desna): slotovi N1..N8 (na PR stan 11 spaja N7+N8)
-     - jug: S1,S2,S3, [ulaz/stepeniste/lift], S4..S7
-     - na PR istocni kraj juzne strane zauzimaju garaze (br. 49-53)
-     Strane: S = jug (ulaz), N = sever, F = pun gabarit (ugaoni).         */
-  var SL = {
-    W:  [0.000, 0.138],
-    N1: [0.138, 0.276], N2: [0.276, 0.376], N3: [0.376, 0.469], N4: [0.469, 0.573],
-    N5: [0.573, 0.671], N6: [0.671, 0.768], N7: [0.768, 0.842], N8: [0.842, 1.000],
-    N78:[0.768, 1.000],
-    S1: [0.138, 0.213], S2: [0.213, 0.321], S3: [0.321, 0.445],
-    S4: [0.516, 0.600], S5: [0.600, 0.712], S6: [0.712, 0.815], S7: [0.815, 1.000]
-  };
-  var POS = {
-    /* prizemlje */
-    C04: ['W','F'],  C03: ['S1','S'], C02: ['S2','S'], C01: [[0.321,0.416],'S'],
-    C15: ['S4','S'], C14: ['S5','S'], C13: ['S6','S'], C12: [[0.815,0.894],'S'],
-    C05: ['N1','N'], C06: ['N2','N'], C07: ['N3','N'], C08: ['N4','N'],
-    C09: ['N5','N'], C10: ['N6','N'], C11: ['N78','N'],
-    /* prvi sprat */
-    C19: ['W','F'],  C18: ['S1','S'], C17: ['S2','S'], C16: ['S3','S'],
-    C31: ['S4','S'], C30: ['S5','S'], C29: ['S6','S'], C28: ['S7','S'],
-    C20: ['N1','N'], C21: ['N2','N'], C22: ['N3','N'], C23: ['N4','N'],
-    C24: ['N5','N'], C25: ['N6','N'], C26: ['N7','N'], C27: ['N8','N'],
-    /* drugi sprat */
-    C35: ['W','F'],  C34: ['S1','S'], C33: ['S2','S'], C32: ['S3','S'],
-    C47: ['S4','S'], C46: ['S5','S'], C45: ['S6','S'], C44: ['S7','S'],
-    C36: ['N1','N'], C37: ['N2','N'], C38: ['N3','N'], C39: ['N4','N'],
-    C40: ['N5','N'], C41: ['N6','N'], C42: ['N7','N'], C43: ['N8','N'],
-    /* potkrovlje */
-    C51: ['W','F'],  C50: ['S1','S'], C49: ['S2','S'], C48: ['S3','S'],
-    C63: ['S4','S'], C62: ['S5','S'], C61: ['S6','S'], C60: ['S7','S'],
-    C52: ['N1','N'], C53: ['N2','N'], C54: ['N3','N'], C55: ['N4','N'],
-    C56: ['N5','N'], C57: ['N6','N'], C58: ['N7','N'], C59: ['N8','N']
+     Redosled OCITAN iz osnova sve cetiri etaze u projektnoj dokumentaciji.
+     Sirine segmenata su proporcionalne stvarnoj kvadraturi stana, pa je
+     odnos velicina u 3D prikazu veran projektu.
+     Strane: F = zapadni ugao (pun gabarit), N = sever, S = jug (ulaz).
+     CORE = ulaz/stepeniste/lift u juznom nizu; GAR = garaze (samo PR).   */
+  var ORDER = {
+    'PR': { W: 'C04', N: ['C05','C06','C07','C08','C09','C10','C11'],
+            S: ['C03','C02','C01','CORE','C15','C14','C13','C12','GAR'] },
+    '1':  { W: 'C19', N: ['C20','C21','C22','C23','C24','C25','C26','C27'],
+            S: ['C18','C17','C16','CORE','C31','C30','C29','C28'] },
+    '2':  { W: 'C35', N: ['C36','C37','C38','C39','C40','C41','C42','C43'],
+            S: ['C34','C33','C32','CORE','C47','C46','C45','C44'] },
+    'PK': { W: 'C51', N: ['C52','C53','C54','C55','C56','C57','C58','C59'],
+            S: ['C50','C49','C48','CORE','C63','C62','C61','C60'] }
   };
 
-  units.forEach(function (u) {
-    var p = POS[u.id];
-    var seg = (typeof p[0] === 'string') ? SL[p[0]] : p[0];
-    u.lx = seg[0];
-    u.lw = seg[1] - seg[0];
-    u.side = p[1];
-  });
+  var LEN = 64;             // duzina lamele u metrima
+  var CORE_W = { 'PR': 5.5, '1': 4.2, '2': 4.2, 'PK': 4.2 };  // ulazni blok
+  var GAR_W = 6.8;          // garaze na istoku prizemlja
+  var FULL_DEPTH = 13.0;    // dubina ugaonog stana punog gabarita
 
   var floors = FLOOR_ORDER.map(function (k, li) {
+    var ord = ORDER[k];
+    var wUnit = byId[ord.W];
+    /* zapadni ugaoni stan: sirina iz kvadrature preko pune dubine */
+    var wW = wUnit.zatvoreno / FULL_DEPTH;
+    wUnit.side = 'F';
+    wUnit.lx = 0;
+    wUnit.lw = wW / LEN;
+
+    var core = null, gar = null;
+
+    /* niz: fiksne sirine za CORE/GAR, ostatak proporcionalno kvadraturi */
+    function layoutRow(ids, side) {
+      var fixed = 0, areaSum = 0;
+      ids.forEach(function (id) {
+        if (id === 'CORE') fixed += CORE_W[k];
+        else if (id === 'GAR') fixed += GAR_W;
+        else areaSum += byId[id].zatvoreno;
+      });
+      var free = LEN - wW - fixed;
+      var x = wW;
+      ids.forEach(function (id) {
+        var w;
+        if (id === 'CORE') { w = CORE_W[k]; core = [x / LEN, (x + w) / LEN]; }
+        else if (id === 'GAR') { w = GAR_W; gar = [x / LEN, (x + w) / LEN]; }
+        else {
+          var u = byId[id];
+          w = u.zatvoreno / areaSum * free;
+          u.side = side;
+          u.lx = x / LEN;
+          u.lw = w / LEN;
+        }
+        x += w;
+      });
+    }
+    layoutRow(ord.N, 'N');
+    layoutRow(ord.S, 'S');
+
     var us = units.filter(function (u) { return u.etaza === k; });
     var areas = us.map(function (u) { return u.ukupno; });
     return {
@@ -252,13 +268,12 @@ window.MODUS_DATA = {
       name: FLOOR_NAMES[k],
       units: us,
       count: us.length,
+      core: core,
+      gar: gar,
       minA: Math.min.apply(null, areas),
       maxA: Math.max.apply(null, areas)
     };
   });
-
-  var byId = {};
-  units.forEach(function (u) { byId[u.id] = u; });
 
   /* --------------------------------- druga zgrada: Milosa Obrenovica ---- */
   var STRUKT_BOJA = {

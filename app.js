@@ -298,10 +298,10 @@
         unitMeshes.push(mesh);
       });
 
-      /* prizemlje: garaze na istocnom kraju juzne strane (mesta 49-53) */
-      if (f.key === 'PR') {
-        var gw = (1.0 - 0.894) * fw - GAP;
-        var gx = -fw / 2 + ((0.894 + 1.0) / 2) * fw;
+      /* garaze na istocnom kraju juzne strane prizemlja (mesta 49-53) */
+      if (f.gar) {
+        var gw = (f.gar[1] - f.gar[0]) * fw - GAP;
+        var gx = -fw / 2 + ((f.gar[0] + f.gar[1]) / 2) * fw;
         var gar = new THREE.Mesh(
           new THREE.BoxGeometry(gw, unitH * 0.9, unitD - 0.1),
           mkMat({ color: 0x1a1c20, roughness: 0.85 })
@@ -356,8 +356,8 @@
 
       /* prizemlje: ulazna nadstresnica na jugu (centar) */
       if (f.key === 'PR') {
-        /* ulaz je na ~48% duzine lamele (izmedju stana 01 i 15) */
-        var ex = (0.48 - 0.5) * L;
+        /* nadstresnica tacno nad ulaznim blokom iz osnove */
+        var ex = (((f.core[0] + f.core[1]) / 2) - 0.5) * L;
         var can = new THREE.Mesh(
           new THREE.BoxGeometry(6, 0.18, 2.6),
           mkMat({ color: COL.fin, roughness: 0.6, metalness: 0.2 })
@@ -902,20 +902,17 @@
         '<text x="' + (x + w / 2) + '" y="' + (y + h / 2 + 11) + '" text-anchor="middle" ' +
         'font-size="7.5" fill="rgba(255,255,255,.45)">' + Math.round(u.ukupno) + ' m²</text></g>';
     });
-    /* ulaz / stepenisni blok u juznom nizu */
-    var coreX0 = (f.key === 'PR' ? 0.416 : 0.445) * W, coreX1 = 0.516 * W;
-    s += '<rect x="' + (coreX0 + 1) + '" y="' + (rowH + corr) + '" width="' + (coreX1 - coreX0 - 2) + '" height="' + rowH + '" rx="3" ' +
-      'fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.18)" stroke-dasharray="3 3" stroke-width="1"/>' +
-      '<text x="' + ((coreX0 + coreX1) / 2) + '" y="' + (rowH + corr + rowH / 2 + 2) + '" text-anchor="middle" ' +
-      'font-size="6.5" fill="rgba(255,255,255,.4)">ULAZ</text>';
-    /* garaze na PR */
-    if (f.key === 'PR') {
-      var gx0 = 0.894 * W;
-      s += '<rect x="' + (gx0 + 1) + '" y="' + (rowH + corr) + '" width="' + (W - gx0 - 2) + '" height="' + rowH + '" rx="3" ' +
+    /* sluzbeni blokovi u juznom nizu: ulaz/stepeniste i garaze */
+    function block(seg, label) {
+      if (!seg) return '';
+      var x0 = seg[0] * W, x1 = seg[1] * W;
+      return '<rect x="' + (x0 + 1) + '" y="' + (rowH + corr) + '" width="' + (x1 - x0 - 2) + '" height="' + rowH + '" rx="3" ' +
         'fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.18)" stroke-dasharray="3 3" stroke-width="1"/>' +
-        '<text x="' + ((gx0 + W) / 2) + '" y="' + (rowH + corr + rowH / 2 + 2) + '" text-anchor="middle" ' +
-        'font-size="6.5" fill="rgba(255,255,255,.4)">GARAŽE</text>';
+        '<text x="' + ((x0 + x1) / 2) + '" y="' + (rowH + corr + rowH / 2 + 2) + '" text-anchor="middle" ' +
+        'font-size="6.5" fill="rgba(255,255,255,.4)">' + label + '</text>';
     }
+    s += block(f.core, 'ULAZ');
+    s += block(f.gar, 'GARAŽE');
     s += '<rect x="0" y="' + rowH + '" width="' + W + '" height="' + corr + '" fill="rgba(255,255,255,.05)"/>';
     s += '<text x="' + (W - 2) + '" y="' + (H + 14) + '" text-anchor="end" font-size="7" fill="rgba(255,255,255,.3)">JUG ↓</text>';
     s += '</svg></div>';
