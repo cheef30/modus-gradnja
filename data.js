@@ -52,6 +52,32 @@ window.MODUS_DATA = {
     "T63": { "sp": 1, "zatvoreno": 42.72, "terasa":  6.95, "ukupno": 49.67, "redukovano": 48.39, "sobe": ["hodnik 3.06","kupatilo 4.80","kuhinja 4.42","dnevna soba sa trpezarijom 13.60","degazman 5.40","spavaca soba 11.44"] }
   },
 
+  "_drugaZgrada": "Objekat Milosa Obrenovica - 7 stanova u ponudi. Podaci sa prodajnih listova u img/druga-zgrada/. Struktura je preuzeta doslovno sa lista (investitorova oznaka).",
+  "drugaZgrada": {
+    "naziv": "Miloša Obrenovića",
+    "tipovi": {
+      "M1":  { "struktura": "Dvoiposoban",   "ukupno": 64.32, "terasa": 0,    "list": "s1, prizemlje.jpeg",
+               "sobe": ["hodnik 3.92","spavaca soba 11.19","spavaca soba 9.39","dnevni boravak 23.72","kupatilo 5.15","kuhinja 10.95"] },
+      "M5":  { "struktura": "Trosoban",      "ukupno": 78.43, "terasa": 5.40, "list": "s5,13.jpeg",
+               "sobe": ["hodnik 10.88","spavaca soba 10.93","spavaca soba 10.67","dnevni boravak 28.47","kupatilo 4.86","kuhinja 7.22"] },
+      "M10": { "struktura": "Trosoban",      "ukupno": 72.89, "terasa": 3.40, "list": "s10,18.jpeg",
+               "sobe": ["hodnik 11.23","spavaca soba 10.48","spavaca soba 12.13","dnevni boravak 24.76","kupatilo 5.34","kuhinja 5.55"] },
+      "M14": { "struktura": "Dvosoban",      "ukupno": 67.43, "terasa": 5.00, "list": "s14.jpeg",
+               "sobe": ["hodnik 8.30","spavaca soba 14.56","dnevni boravak 27.93","kupatilo 4.78","kuhinja 6.86"] },
+      "M17": { "struktura": "Jednoiposoban", "ukupno": 47.82, "terasa": 3.44, "list": "s17.jpeg",
+               "sobe": ["hodnik 4.85","spavaca soba 10.09","dnevni boravak 16.36","kupatilo 4.89","kuhinja 8.19"] }
+    },
+    "jedinice": [
+      { "broj": 1,  "etaza": "Prizemlje",   "tip": "M1"  },
+      { "broj": 5,  "etaza": "Prvi sprat",  "tip": "M5"  },
+      { "broj": 10, "etaza": "Prvi sprat",  "tip": "M10" },
+      { "broj": 13, "etaza": "Drugi sprat", "tip": "M5"  },
+      { "broj": 14, "etaza": "Drugi sprat", "tip": "M14" },
+      { "broj": 17, "etaza": "Drugi sprat", "tip": "M17" },
+      { "broj": 18, "etaza": "Drugi sprat", "tip": "M10" }
+    ]
+  },
+
   "jedinice": [
     { "id": "C01", "etaza": "PR", "tip": "T01", "list": "05.jpg" },
     { "id": "C02", "etaza": "PR", "tip": "T02", "list": "06.jpg" },
@@ -234,6 +260,35 @@ window.MODUS_DATA = {
   var byId = {};
   units.forEach(function (u) { byId[u.id] = u; });
 
+  /* --------------------------------- druga zgrada: Milosa Obrenovica ---- */
+  var STRUKT_BOJA = {
+    'Jednoiposoban': '#8fbf9a',
+    'Dvosoban':      '#5aa0e0',
+    'Dvoiposoban':   '#a89bd0',
+    'Trosoban':      '#c8a86b'
+  };
+  var DZ = D.drugaZgrada;
+  var dzUnits = DZ.jedinice.map(function (j) {
+    var t = DZ.tipovi[j.tip];
+    var rooms = parseRooms(t.sobe);
+    return {
+      id: 'M' + j.broj,
+      num: j.broj,
+      etazaNaziv: j.etaza,
+      tipKey: j.tip,
+      struktura: t.struktura,
+      color: STRUKT_BOJA[t.struktura] || '#c8a86b',
+      ukupno: t.ukupno,
+      terasa: t.terasa,
+      zatvoreno: Math.round((t.ukupno - t.terasa) * 100) / 100,
+      rooms: rooms,
+      beds: rooms.filter(function (r) { return /spavaca/i.test(r.n); }).length,
+      list: t.list
+    };
+  });
+  var dzById = {};
+  dzUnits.forEach(function (u) { dzById[u.id] = u; });
+
   /* ----------------------------------------------------------- format --- */
   function a2(n) { return n.toFixed(2).replace('.', ','); }
 
@@ -243,7 +298,9 @@ window.MODUS_DATA = {
     floors: floors,
     STRUKT: STRUKT,
     FLOOR_NAMES: FLOOR_NAMES,
-    getUnit: function (id) { return byId[id] || null; },
+    dz: { naziv: DZ.naziv, units: dzUnits },
+    getUnit: function (id) { return byId[id] || dzById[id] || null; },
+    isDZ: function (id) { return !!dzById[id]; },
     getFloor: function (key) {
       for (var i = 0; i < floors.length; i++) {
         if (floors[i].key === key || floors[i].level === key) return floors[i];

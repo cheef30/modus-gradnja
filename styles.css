@@ -171,6 +171,12 @@ section{position:relative}
 }
 .apt-card .ac-cta:hover{border-color:var(--accent);color:var(--accent)}
 
+.apt-head{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;flex-wrap:wrap;margin-bottom:26px}
+.ac-photo{display:block;position:relative;height:200px;overflow:hidden;background:#fff}
+.ac-photo img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s}
+.apt-card:hover .ac-photo img{transform:scale(1.04)}
+.ac-photo .ac-tag{position:absolute;top:12px;left:12px;backdrop-filter:blur(8px)}
+
 #view3d[hidden],.apt-cards-view[hidden]{display:none}
 .cfg-shell{
   display:grid;grid-template-columns:1fr 372px;gap:0;

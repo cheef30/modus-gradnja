@@ -32,12 +32,24 @@
     return;
   }
 
-  document.title = 'Stan br. ' + u.num + ' · ' + u.etazaNaziv + ' — MODUS GRADNJA';
+  /* stanovi druge zgrade (Milosa Obrenovica) imaju svoj oblik podataka */
+  var isDZ = M.isDZ(u.id);
+  if (isDZ) {
+    u = Object.assign({}, u, {
+      strukt: { key: 'dz', label: u.struktura, color: u.color },
+      duplex: false,
+      redukovano: null,
+      objekat: M.dz.naziv
+    });
+  }
+
+  document.title = 'Stan ' + (isDZ ? '' : 'br. ') + u.num + ' · ' + u.etazaNaziv + ' — MODUS GRADNJA';
 
   /* ------------------------------------------ prodajni list (slika) ----- */
-  var SHEET_DIR = 'img/stanovi-web/';
   function sheetHTML(unit) {
-    var src = SHEET_DIR + unit.list;
+    var src = isDZ
+      ? 'img/druga-zgrada/' + encodeURIComponent(unit.list)
+      : 'img/stanovi-web/' + unit.list;
     return '<a class="sheet-box" href="' + src + '" target="_blank" rel="noopener" ' +
       'title="Otvori prodajni list u punoj veličini">' +
       '<img src="' + src + '" alt="Stan br. ' + unit.num + ' — prodajni list sa tlocrtom" loading="lazy">' +
@@ -47,7 +59,8 @@
   /* ------------------------------------------------- presek zgrade ------ */
   function buildingSVG(fkey) {
     var s = '<svg viewBox="0 0 200 96">';
-    var order = ['PK', '2', '1', 'PR'];
+    var order = isDZ ? ['Drugi sprat', 'Prvi sprat', 'Prizemlje'] : ['PK', '2', '1', 'PR'];
+    var lbl = { 'Drugi sprat': '2', 'Prvi sprat': '1', 'Prizemlje': 'PR' };
     order.forEach(function (k, i) {
       var y = 22 + i * 16;
       var on = k === fkey;
@@ -55,7 +68,7 @@
       var stroke = on ? '#c8a86b' : 'rgba(255,255,255,.12)';
       s += '<rect x="30" y="' + y + '" width="140" height="14" rx="2" fill="' + fill + '" stroke="' + stroke + '" stroke-width="1"/>' +
         '<text x="22" y="' + (y + 10.5) + '" text-anchor="end" font-size="8.5" ' +
-        'fill="' + (on ? '#c8a86b' : 'rgba(255,255,255,.32)') + '">' + k + '</text>';
+        'fill="' + (on ? '#c8a86b' : 'rgba(255,255,255,.32)') + '">' + (lbl[k] || k) + '</text>';
       if (on) s += '<text x="178" y="' + (y + 10.5) + '" font-size="8.5" fill="#c8a86b">vaš stan</text>';
     });
     /* krov */
@@ -66,16 +79,21 @@
 
   /* ------------------------------------------------------------- render */
   var strukt = u.strukt;
+  var naslov = 'Stan ' + (isDZ ? '' : 'br. ') + u.num;
+  var objekat = isDZ ? u.objekat : 'Kneza Sime Markovića';
+  var pillAttr = isDZ
+    ? ' style="background:' + strukt.color + '22;color:' + strukt.color + '"'
+    : '';
 
   var html = '';
   html += '<div class="crumb"><a href="index.html">Početna</a> · <a href="index.html#stanovi">Stanovi</a> · ' +
-    '<span>' + u.etazaNaziv + '</span> · <span style="color:var(--txt)">Stan br. ' + u.num + '</span></div>';
+    '<span>' + objekat + '</span> · <span style="color:var(--txt)">' + naslov + '</span></div>';
 
   html += '<div class="sp-head">' +
     '<div>' +
-    '<span class="pill ' + strukt.key + '">' + strukt.label + (u.duplex ? ' · Duplex' : '') + '</span>' +
-    '<h1 style="margin-top:14px">Stan br. ' + u.num + '</h1>' +
-    '<div class="sub">' + u.etazaNaziv + ' · ' + M.a2(u.zatvoreno) + ' m² zatvorenog prostora' +
+    '<span class="pill ' + strukt.key + '"' + pillAttr + '>' + strukt.label + (u.duplex ? ' · Duplex' : '') + '</span>' +
+    '<h1 style="margin-top:14px">' + naslov + '</h1>' +
+    '<div class="sub">' + objekat + ' · ' + u.etazaNaziv + ' · ' + M.a2(u.zatvoreno) + ' m² zatvorenog prostora' +
     (u.terasa ? ' · terasa ' + M.a2(u.terasa) + ' m²' : '') + '</div>' +
     '</div>' +
     '<div class="price-box">' +
@@ -93,7 +111,7 @@
       '<span>Zatvoreno ' + M.a2(u.zatvoreno) + ' m²</span>' +
       (u.terasa ? '<span>Terasa ' + M.a2(u.terasa) + ' m²</span>' : '') +
       '<span>Ukupno ' + M.a2(u.ukupno) + ' m²</span>' +
-      '<span>Redukovano (−3%) ' + M.a2(u.redukovano) + ' m²</span>' +
+      (u.redukovano ? '<span>Redukovano (−3%) ' + M.a2(u.redukovano) + ' m²</span>' : '') +
     '</div>' +
     (u.duplex
       ? '<p style="font-size:13.5px;color:var(--muted);margin-top:18px">' +
@@ -107,14 +125,15 @@
   html += '<div><div class="sticky">' +
     '<p class="eyebrow">Specifikacija</p>' +
     '<div class="spec">' +
-      row('Oznaka stana', u.id) +
+      row('Objekat', objekat) +
+      row('Oznaka stana', isDZ ? ('S' + u.num) : u.id) +
       row('Struktura', strukt.label + (u.duplex ? ' — duplex' : '')) +
       row('Sprat', u.etazaNaziv) +
       row('Spavaće sobe', u.beds) +
       row('Zatvoreni prostor', M.a2(u.zatvoreno) + ' m²') +
       (u.terasa ? row('Terasa', M.a2(u.terasa) + ' m²') : '') +
       row('Ukupna neto površina', M.a2(u.ukupno) + ' m²') +
-      row('Redukovana (−3%)', M.a2(u.redukovano) + ' m²') +
+      (u.redukovano ? row('Redukovana (−3%)', M.a2(u.redukovano) + ' m²') : '') +
       row('Grejanje', 'Centralno gradsko') +
       row('Status', 'U ponudi') +
     '</div>' +
@@ -136,16 +155,29 @@
 
   html += '</div>';
 
-  /* ------------------------------------------- ostali stanovi na etazi -- */
-  var f = M.getFloor(u.etaza);
-  var others = f.units.filter(function (x) { return x.id !== u.id; });
+  /* ------------------------------------------- ostali stanovi ----------- */
+  var others, relTitle, relEyebrow;
+  if (isDZ) {
+    others = M.dz.units.filter(function (x) { return x.id !== u.id; })
+      .map(function (x) {
+        return { id: x.id, num: x.num, ukupno: x.ukupno, terasa: x.terasa, beds: x.beds,
+                 strukt: { key: 'dz', label: x.struktura, color: x.color }, dz: true };
+      });
+    relEyebrow = 'Objekat ' + objekat;
+    relTitle = 'Ostali stanovi u ponudi';
+  } else {
+    others = M.getFloor(u.etaza).units.filter(function (x) { return x.id !== u.id; });
+    relEyebrow = 'Na istoj etaži';
+    relTitle = 'Ostali stanovi — ' + u.etazaNaziv.toLowerCase();
+  }
   if (others.length) {
-    html += '<section class="related"><p class="eyebrow">Na istoj etaži</p>' +
-      '<h2 style="font-size:30px">Ostali stanovi — ' + u.etazaNaziv.toLowerCase() + '</h2><div class="rel-grid">';
+    html += '<section class="related"><p class="eyebrow">' + relEyebrow + '</p>' +
+      '<h2 style="font-size:30px">' + relTitle + '</h2><div class="rel-grid">';
     others.forEach(function (x) {
+      var pa = x.dz ? ' style="background:' + x.strukt.color + '22;color:' + x.strukt.color + '"' : '';
       html += '<a class="card" href="stan.html?id=' + x.id + '">' +
-        '<div class="uc-top"><b style="font-size:16px">Stan br. ' + x.num + '</b>' +
-        '<span class="pill ' + x.strukt.key + '">' + x.strukt.label + '</span></div>' +
+        '<div class="uc-top"><b style="font-size:16px">Stan ' + (x.dz ? '' : 'br. ') + x.num + '</b>' +
+        '<span class="pill ' + x.strukt.key + '"' + pa + '>' + x.strukt.label + '</span></div>' +
         '<div class="uc-meta" style="margin-top:8px">' +
         '<span>' + M.a2(x.ukupno) + ' m²</span>' +
         '<span>' + x.beds + (x.beds === 1 ? ' spavaća' : ' spavaće') + '</span>' +
@@ -160,7 +192,7 @@
   /* ------------------------------------------------ kontakt forma ------- */
   html += '<section class="related" id="upit">' +
     '<p class="eyebrow">Kontakt</p>' +
-    '<h2 style="font-size:30px">Zakažite obilazak stana br. ' + u.num + '.</h2>' +
+    '<h2 style="font-size:30px">Zakažite obilazak — ' + naslov.toLowerCase() + '.</h2>' +
     '<p class="lead" style="margin-top:14px">Ostavite podatke i javljamo se istog radnog dana — ' +
     'ili nas pozovite direktno na <a href="' + TEL_1_HREF + '" style="color:var(--accent)">' + TEL_1 + '</a>.</p>' +
     '<form class="form" id="unitForm" novalidate style="margin-top:30px;max-width:760px">' +
@@ -169,8 +201,9 @@
       '<div class="field"><label for="uTel">Telefon</label>' +
         '<input id="uTel" type="tel" placeholder="06x xxx xxxx" required></div>' +
       '<div class="field full"><label for="uMsg">Poruka</label>' +
-        '<textarea id="uMsg">Zdravo, zanima me stan br. ' + u.num + ' (' + u.strukt.label.toLowerCase() +
-        ', ' + M.a2(u.ukupno) + ' m², ' + u.etazaNaziv.toLowerCase() + '). Molim vas da me kontaktirate.</textarea></div>' +
+        '<textarea id="uMsg">Zdravo, zanima me ' + naslov.toLowerCase() + ' u objektu ' + objekat +
+        ' (' + u.strukt.label.toLowerCase() + ', ' + M.a2(u.ukupno) + ' m², ' +
+        u.etazaNaziv.toLowerCase() + '). Molim vas da me kontaktirate.</textarea></div>' +
       '<button class="btn btn-primary" type="submit" style="grid-column:1/-1;justify-content:center">Pošalji upit</button>' +
       '<p class="form-note" id="uNote">Upit se šalje na ' + MAIL + ' preko vašeg email programa.</p>' +
     '</form>' +
@@ -203,10 +236,11 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({
-          _subject: 'Upit za stan br. ' + u.num + ' (' + u.id + ')',
+          _subject: 'Upit — ' + naslov + ', ' + objekat,
           _template: 'table',
           _captcha: 'false',
-          'Stan': 'br. ' + u.num + ' — ' + u.strukt.label + ', ' + M.a2(u.ukupno) + ' m², ' + u.etazaNaziv,
+          'Objekat': objekat,
+          'Stan': naslov + ' — ' + u.strukt.label + ', ' + M.a2(u.ukupno) + ' m², ' + u.etazaNaziv,
           'Ime i prezime': ime,
           'Telefon': tel,
           'Poruka': msg

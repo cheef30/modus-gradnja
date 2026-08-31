@@ -459,30 +459,24 @@
     btnCards.onclick = function () { showView('cards'); };
   }
 
-  /* ===================================================== KARTICE STANOVA */
-  var ICON_HOME =
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">' +
-    '<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M10 19.5v-6h4v6"/></svg>';
-
+  /* ============================ KARTICE — objekat Milosa Obrenovica ----- */
   function renderApartmentCards() {
     var host = document.getElementById('aptCards');
     if (!host) return;
-    var ids = ['C06', 'C10', 'C50'];
     var html = '';
-    ids.forEach(function (id) {
-      var u = M.getUnit(id);
-      if (!u) return;
+    M.dz.units.forEach(function (u) {
       html += '<div class="apt-card">' +
-        '<div class="ac-img">' + ICON_HOME +
-        '<span class="ac-tag pill ' + u.strukt.key + '">' + u.strukt.label + (u.duplex ? ' · Duplex' : '') + '</span>' +
-        '</div>' +
+        '<a class="ac-img ac-photo" href="stan.html?id=' + u.id + '">' +
+        '<img src="img/druga-zgrada/' + encodeURIComponent(u.list) + '" alt="Stan ' + u.num + ' — ' + u.struktura + '" loading="lazy">' +
+        '<span class="ac-tag pill" style="background:' + u.color + '22;color:' + u.color + '">' + u.struktura + '</span>' +
+        '</a>' +
         '<div class="ac-body">' +
-        '<h3>Stan br. ' + u.num + '</h3>' +
-        '<p class="ac-sub">' + u.etazaNaziv + (u.duplex ? ' · dva nivoa' : '') + '</p>' +
+        '<h3>Stan ' + u.num + '</h3>' +
+        '<p class="ac-sub">' + u.etazaNaziv + '</p>' +
         '<div class="ac-meta">' +
         '<span>' + M.a2(u.ukupno) + ' m²</span>' +
         '<span>' + u.beds + (u.beds === 1 ? ' spavaća' : ' spavaće') + '</span>' +
-        '<span>Terasa ' + M.a2(u.terasa) + ' m²</span>' +
+        (u.terasa ? '<span>Terasa ' + M.a2(u.terasa) + ' m²</span>' : '') +
         '</div>' +
         '<div class="ac-price"><b>Cena na upit</b><small>cenovnik uskoro</small></div>' +
         '<a class="ac-cta" href="stan.html?id=' + u.id + '">Pogledaj detalje stana</a>' +
