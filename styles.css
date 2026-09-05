@@ -1,5 +1,5 @@
 /* ==========================================================================
-   MODUS GRADNJA — demo stilovi
+   MODUS GRADNJA — stilovi
    ========================================================================== */
 :root{
   --bg:#08090b;
@@ -24,6 +24,35 @@
 
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
+
+/* ---------- pristupacnost ----------
+   Fokus se vidi samo pri navigaciji tastaturom (:focus-visible), pa mis
+   i dodir ostaju bez okvira. */
+:focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:3px;
+  border-radius:4px;
+}
+.field input:focus-visible,
+.field textarea:focus-visible,
+.field select:focus-visible{outline-offset:1px}
+.btn:focus-visible,.nav-cta:focus-visible,.vt-btn:focus-visible{outline-offset:4px}
+/* mete skip-linka — fokus se pomera, ali bez okvira oko cele sekcije */
+[tabindex="-1"]:focus,[tabindex="-1"]:focus-visible{outline:none}
+
+/* sadrzaj samo za citace ekrana */
+.sr-only{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;
+}
+
+/* preskoci na sadrzaj — vidljiv tek kad dobije fokus */
+.skip-link{
+  position:absolute;left:16px;top:-100px;z-index:200;
+  background:var(--accent);color:#12100b;font-size:14px;font-weight:600;
+  padding:12px 22px;border-radius:0 0 10px 10px;transition:top .18s ease;
+}
+.skip-link:focus{top:0}
 body{
   margin:0;background:var(--bg);color:var(--txt);font-family:var(--ff);
   font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;
@@ -351,15 +380,6 @@ footer{border-top:1px solid var(--line);padding:56px 0 34px;background:#07080a}
 .spec .r b{font-weight:500;text-align:right}
 .sticky{position:sticky;top:96px}
 .cta-row{display:flex;gap:12px;flex-wrap:wrap;margin:24px 0 30px}
-.gal{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
-.gal div{
-  aspect-ratio:4/3;border-radius:12px;border:1px solid var(--line);position:relative;overflow:hidden;
-  display:flex;align-items:flex-end;padding:14px;font-size:11.5px;color:rgba(255,255,255,.62);letter-spacing:.04em;
-}
-.g1{background:linear-gradient(150deg,#2a2419,#14120e 70%)}
-.g2{background:linear-gradient(150deg,#1b2430,#0d1116 70%)}
-.g3{background:linear-gradient(150deg,#241d22,#121013 70%)}
-.gal div::after{content:'DEMO RENDER';position:absolute;top:12px;right:12px;font-size:9px;letter-spacing:.14em;color:rgba(255,255,255,.28)}
 .mini-bldg{border:1px solid var(--line);border-radius:16px;padding:22px;background:var(--panel);margin-top:22px}
 .mini-bldg .mt{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted-2);margin-bottom:14px}
 .related{margin-top:90px;padding-top:50px;border-top:1px solid var(--line)}
@@ -441,7 +461,7 @@ footer{border-top:1px solid var(--line);padding:56px 0 34px;background:#07080a}
   .grid-2,.split{grid-template-columns:1fr;gap:34px}
   .split .txt{padding:34px 26px}
   .split .vis{min-height:220px}
-  .cards,.rel-grid,.gal,.apt-cards{grid-template-columns:1fr}
+  .cards,.rel-grid,.apt-cards{grid-template-columns:1fr}
   .view-toggle{width:100%;overflow-x:auto}
   .f-grid{grid-template-columns:1fr 1fr;gap:28px}
   .form{grid-template-columns:1fr}

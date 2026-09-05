@@ -56,6 +56,8 @@
 </head>
 <body>
 
+<a class="skip-link" href="#o-nama">Preskoči na sadržaj</a>
+
 <!-- ============================== NAV ============================== -->
 <nav class="nav" id="nav">
   <div class="nav-in">
@@ -101,7 +103,7 @@
 </header>
 
 <!-- ============================== O NAMA ============================== -->
-<section class="sec" id="o-nama">
+<section class="sec" id="o-nama" tabindex="-1">
   <div class="wrap">
     <div class="grid-2 rv">
       <div>
@@ -154,7 +156,7 @@
   <div class="wrap">
     <div class="cfg-head rv">
       <div>
-        <p class="eyebrow">Novi objekat — u pripremi prodaje</p>
+        <p class="eyebrow">Novi objekat — 63 stana u ponudi</p>
         <h2>Izaberi sprat.<br>Izaberi svoj stan.</h2>
       </div>
       <p class="lead" style="max-width:40ch;margin:0">
@@ -164,21 +166,25 @@
     </div>
 
     <div class="view-toggle rv" role="tablist" aria-label="Prikaz objekta">
-      <button class="vt-btn active" id="viewBtn3d" data-view="3d" role="tab" aria-selected="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z"/><path d="M12 3v18M4 7.5l8 4.5 8-4.5"/></svg>
+      <button class="vt-btn active" id="viewBtn3d" data-view="3d" role="tab" aria-selected="true" aria-controls="view3d">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z"/><path d="M12 3v18M4 7.5l8 4.5 8-4.5"/></svg>
         Kneza Sime Markovića
       </button>
-      <button class="vt-btn" id="viewBtnCards" data-view="cards" role="tab" aria-selected="false">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="6" height="16" rx="1.5"/><rect x="10.5" y="4" width="6" height="16" rx="1.5"/><rect x="18" y="4" width="3" height="16" rx="1.5"/></svg>
+      <button class="vt-btn" id="viewBtnCards" data-view="cards" role="tab" aria-selected="false" aria-controls="viewCards">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="4" width="6" height="16" rx="1.5"/><rect x="10.5" y="4" width="6" height="16" rx="1.5"/><rect x="18" y="4" width="3" height="16" rx="1.5"/></svg>
         Miloša Obrenovića
       </button>
     </div>
 
-    <div class="cfg-shell rv" id="view3d">
+    <div class="cfg-shell rv" id="view3d" role="tabpanel" aria-labelledby="viewBtn3d">
       <!-- 3D scena -->
       <div class="stage" id="stage">
-        <canvas id="scene"></canvas>
-        <div class="tooltip" id="tooltip"></div>
+        <canvas id="scene" aria-hidden="true"></canvas>
+        <p class="sr-only">
+          Trodimenzionalni prikaz objekta zahteva miš ili dodirni ekran.
+          Isti izbor sprata i stana dostupan je u listi spratova koja sledi.
+        </p>
+        <div class="tooltip" id="tooltip" role="status" aria-live="polite"></div>
 
         <div class="loader" id="loader">
           <div class="bar"><i></i></div>
@@ -191,9 +197,9 @@
               <b>Novi stambeni objekat</b> · Pr+2+Pk · 63 stana
             </div>
             <div class="stage-btns">
-              <button class="sbtn" id="btnZoomIn" title="Približi">+</button>
-              <button class="sbtn" id="btnZoomOut" title="Udalji">−</button>
-              <button class="sbtn" id="btnReset" title="Resetuj pogled">⟲</button>
+              <button class="sbtn" id="btnZoomIn" title="Približi" aria-label="Približi prikaz">+</button>
+              <button class="sbtn" id="btnZoomOut" title="Udalji" aria-label="Udalji prikaz">−</button>
+              <button class="sbtn" id="btnReset" title="Resetuj pogled" aria-label="Resetuj pogled">⟲</button>
             </div>
           </div>
           <div>
@@ -210,13 +216,13 @@
       </div>
 
       <!-- bocni panel -->
-      <aside class="panel">
+      <aside class="panel" aria-label="Izbor sprata i stana">
         <div class="panel-head" id="panelHead"></div>
         <div class="panel-body" id="panelBody"></div>
       </aside>
     </div>
 
-    <div class="apt-cards-view" id="viewCards" hidden>
+    <div class="apt-cards-view" id="viewCards" hidden role="tabpanel" aria-labelledby="viewBtnCards">
       <div class="apt-head">
         <div>
           <p class="eyebrow" style="margin-bottom:10px">Objekat Miloša Obrenovića</p>
@@ -391,7 +397,7 @@
       </div>
       <div>
         <h4>Sadržaji</h4>
-        <a href="#kafic">Kafe Moneta</a><a href="#perionica">Autoperionica</a><a href="#o-nama">Poslovni centar</a>
+        <a href="#kafic">Kafe Moneta</a><a href="#perionica">Perionica</a><a href="#o-nama">Poslovni centar</a>
       </div>
       <div>
         <h4>Kontakt</h4>
@@ -402,7 +408,6 @@
     </div>
     <div class="f-bot">
       <span>© <span id="yr">2026</span> MODUS GRADNJA. Sva prava zadržana.</span>
-      <span>Demo prezentacija · izrada sajta u toku</span>
     </div>
   </div>
 </footer>

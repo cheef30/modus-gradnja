@@ -1,9 +1,21 @@
-# MODUS Rezidencija — 3D konfigurator stanova
+# MODUS GRADNJA — prezentacioni sajt sa 3D konfiguratorom stanova
 
-Demo prezentacioni sajt za građevinsku firmu, sa interaktivnim 3D prikazom
-stambenog objekta i selektorom stanova.
+Sajt građevinske firme MODUS GRADNJA: interaktivni 3D prikaz objekta,
+izbor sprata i stana, prodajni listovi i cene.
 
-**Live demo:** _(dodati link nakon deploy-a)_
+**Sajt:** https://cheef30.github.io/modus-gradnja/
+
+---
+
+## Objekti u ponudi
+
+| Objekat | Spratnost | Stanova | Cene |
+|---|---|---|---|
+| Kneza Sime Markovića | Pr + 1 + 2 + Pk | 63 | u cenovniku |
+| Miloša Obrenovića | Pr + 1 + 2 | 7 | na upit |
+
+Svi podaci (kvadrature, prostorije, površine terasa, raspored po etažama)
+preuzeti su iz projektne dokumentacije investitora.
 
 ---
 
@@ -11,26 +23,37 @@ stambenog objekta i selektorom stanova.
 
 **3D konfigurator**
 
-- Proceduralno generisan model objekta P+7 (Three.js) — bez eksternih 3D fajlova
+- Proceduralno generisan model objekta (Three.js) — bez eksternih 3D fajlova
 - Rotacija mišem, zumiranje točkićem, pinch-zoom na dodirnim ekranima
-- Auto-rotacija dok je scena neaktivna
-- Izbor sprata: izabrana etaža se izdiže i osvetljava, ostale se prigušuju
-- Raycasting selekcija pojedinačnih stanova sa tooltipom (kvadratura, status, cena)
-- Realne senke, ACES tone mapping, kontekst okoline (susedni objekti, zelenilo)
+- Izbor etaže: izabrana se izdiže i osvetljava, ostale se prigušuju
+- Raycasting selekcija stanova sa tooltipom (struktura, kvadratura, cena)
+- Filter po strukturi (dvosobni / trosobni / četvorosobni)
+- 2D osnova etaže sinhronizovana sa 3D prikazom — hover i klik rade u oba smera
+- Širine stanova u modelu proporcionalne stvarnoj kvadraturi
 
 **Prodajni deo**
 
-- Statusi stanova: slobodan / rezervisan / prodat (prodati nisu klikabilni)
-- 2D osnova etaže sinhronizovana sa 3D prikazom — hover i klik rade u oba smera
-- Stranica stana: tlocrt po prostorijama sa kvadraturama, specifikacija,
-  pozicija u objektu, cena i €/m², forma za upit
-- Prizemlje kao poslovna etaža (kafić, autoperionica, lokal)
+- Jedna stranica (`stan.html?id=…`) dinamički opslužuje svih 70 stanova
+- Prodajni list iz dokumentacije: render, tlocrt i tabela površina
+- Specifikacija, cena i €/m², pozicija u objektu, ostali stanovi na etaži
+- Kontakt forma po stanu, sa unapred popunjenom porukom
 
 **Sajt**
 
-- Responsive, tamna premium tema
-- Sekcije: hero, o kompaniji, konfigurator, reference, prateći sadržaji, kontakt
-- Scroll reveal animacije, mobilna navigacija
+- Responsive, tamna tema
+- Kontakt forme šalju upite na mejl prodaje (FormSubmit, bez backenda)
+- Zaštita od spama: honeypot polje + minimalno vreme popunjavanja
+- SEO: Open Graph, Twitter card, JSON-LD (`GeneralContractor`), sitemap, robots
+
+---
+
+## Performanse
+
+3D scena se renderuje **samo kada se nešto menja** — u mirovanju GPU ne radi
+ništa. Petlja se potpuno pauzira kada sekcija nije u vidnom polju ili je tab
+u pozadini. `devicePixelRatio` je ograničen, senke 1024², ~130 draw call-ova.
+
+Poštuje se `prefers-reduced-motion`.
 
 ---
 
@@ -39,66 +62,58 @@ stambenog objekta i selektorom stanova.
 | | |
 |---|---|
 | 3D | Three.js r128 (WebGL) |
-| Kontrola kamere | sopstvena implementacija — sferne koordinate sa damping-om, bez OrbitControls |
+| Kontrola kamere | sopstvena — sferne koordinate sa damping-om, bez OrbitControls |
 | Frontend | Vanilla JS (ES5), HTML5, CSS3 |
-| Zavisnosti | nema build procesa, nema npm-a — otvara se direktno |
+| Zavisnosti | nema build procesa, nema npm-a |
+| Hosting | GitHub Pages |
 
 ---
 
 ## Struktura
 
 ```
-├── index.html      početna strana + konfigurator
-├── stan.html       stranica pojedinačnog stana
-├── styles.css      stilovi (dizajn tokeni kroz CSS varijable)
-├── data.js         model objekta: etaže, jedinice, cene, statusi, tlocrti
-├── app.js          3D scena, kontrole, raycasting, UI panel
-└── stan.js         render stranice stana i SVG tlocrta
-```
-
----
-
-## Pokretanje
-
-Otvoriti `index.html` u browseru. Bez servera, bez instalacije.
-
-Za lokalni server (preporučeno zbog konzistentnog ponašanja ruta):
-
-```bash
-python3 -m http.server 8000
-# → http://localhost:8000
+├── index.html          početna + 3D konfigurator
+├── stan.html           stranica stana (dinamička, ?id=C01…C63, S1…S18)
+├── styles.css          stilovi (dizajn tokeni kroz CSS varijable)
+├── data.js             GENERISAN iz stanovi.json + API sloj
+├── site.js             zajedničko: nav, scroll reveal, forme, kontakt
+├── app.js              3D scena, kontrole, raycasting, panel etaža
+├── stan.js             render stranice stana
+├── stanovi.json        IZVOR podataka o stanovima
+├── sitemap.xml         sve stranice stanova
+└── img/
+    ├── stanovi/        originalni prodajni listovi (85 MB, van gita)
+    ├── stanovi-web/    web verzije istih listova (8 MB)
+    └── druga-zgrada/   listovi objekta Miloša Obrenovića
 ```
 
 ---
 
 ## Izmena podataka
 
-Sve informacije o objektu su na jednom mestu — `data.js`.
+Izvor istine je **`stanovi.json`** — ne menjati `data.js` ručno, on se generiše.
 
-**Promena statusa stana:**
+- `tipovi` — jedinstveni rasporedi stanova (prostorije i površine)
+- `jedinice` — mapiranje svakog stana na svoj tip, etažu i prodajni list
+- `objekat` — spratnost i zbirne površine
 
-```js
-var STATUS = {
-  3: { A: 'slobodan', B: 'rezervisan', C: 'prodat', D: 'slobodan' },
-  ...
-};
-```
+Raspored duž lamele (ko je gde) i geometrija modela su u API sloju `data.js`
+(`ORDER`, `MODUS.geo`) — 2D osnova i 3D model čitaju iste vrednosti, pa ne mogu
+da se raziđu.
 
-**Promena cena** — funkcija `pricePerM2(level, type)`.
-
-**Promena rasporeda etaže** — niz `STD_UNITS`. Svaka jedinica je definisana
-centrom (`cx`, `cz`) i dimenzijama (`w`, `d`) u metrima. 3D model se generiše
-direktno iz ovih vrednosti, pa se izmenom tlocrta automatski menja i 3D prikaz.
-
-**Promena rasporeda prostorija** — objekat `PLANS`, normalizovane zone `[x, y, w, h]`
-u opsegu 0–1.
+Kontakt podaci su na jednom mestu: `MODUS.kontakt` u `data.js`.
 
 ---
 
-## Napomena
+## Pokretanje
 
-Prikazani objekat, tlocrti, cene i vizuelizacije su demonstracioni.
-Zamenjuju se stvarnom projektnom dokumentacijom investitora.
+```bash
+python3 -m http.server 8000
+# → http://localhost:8000
+```
+
+Lokalni server je potreban — kontakt forme ne rade kada se `index.html`
+otvori kao fajl (`file://`).
 
 ---
 
