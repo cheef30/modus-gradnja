@@ -166,6 +166,21 @@ window.MODUS_DATA = {
   var FLOOR_ORDER = ['PR', '1', '2', 'PK'];
   var FLOOR_NAMES = { 'PR': 'Prizemlje', '1': 'Prvi sprat', '2': 'Drugi sprat', 'PK': 'Potkrovlje' };
 
+  /* ------------------------------------------------------------ cene ----
+     Objekat Kneza Sime Markovica: 1760 EUR/m2 SA PDV-om.
+     Obracunska povrsina je UKUPNA NETO (zatvoreno + terasa), onako kako
+     stoji na prodajnim listovima — terase se naplacuju punom kvadraturom,
+     bez redukcije.
+
+     Objekat Milosa Obrenovica NEMA cenu — tamo i dalje stoji "na upit".
+     Za promenu cene menja se samo ova jedna vrednost.                   */
+  var CENA_M2 = 1760;
+
+  /* 74994 -> "74.994" */
+  function eur(n) {
+    return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  }
+
   function parseRooms(arr) {
     return arr.map(function (s) {
       var m = s.match(/^(.*)\s([\d.]+)$/);
@@ -193,7 +208,9 @@ window.MODUS_DATA = {
       beds: beds,
       duplex: !!t.duplex,
       strukt: st,
-      list: j.list
+      list: j.list,
+      cenaM2: CENA_M2,
+      cena: Math.round(t.ukupno * CENA_M2)   /* osnovica: ukupna neto */
     };
   });
 
@@ -201,39 +218,68 @@ window.MODUS_DATA = {
   units.forEach(function (u) { byId[u.id] = u; });
 
   /* ------------------------------- raspored duz lamele (0..1 po duzini) --
-     Redosled OCITAN iz osnova sve cetiri etaze u projektnoj dokumentaciji.
-     Sirine segmenata su proporcionalne stvarnoj kvadraturi stana, pa je
-     odnos velicina u 3D prikazu veran projektu.
-     Strane: F = zapadni ugao (pun gabarit), N = sever, S = jug (ulaz).
-     CORE = ulaz/stepeniste/lift u juznom nizu; GAR = garaze (samo PR).   */
+     Redosled OCITAN sa semа pozicije na prodajnim listovima (donji levi
+     ugao svakog lista pokazuje etazu sa istaknutim stanom). To je izvor
+     istine — ne prepisivati rucno.
+
+     Dva niza duz lamele, oba idu od zapadnog do istocnog kraja:
+       N = severni (gornji) niz
+       S = juzni (donji) niz, sa ulazom; na PR i sa garazama
+     CORE = ulaz/stepeniste/lift;  GAR = garaze (samo PR).
+
+     NAPOMENA: raniji model je stanove 04/19/35/51 tretirao kao ugaoni
+     stan preko cele dubine objekta. Listovi to demantuju — oni su prosto
+     prvi stanovi SEVERNOG niza, a 03/18/34/50 prvi u JUZNOM. Zbog toga
+     su 03/18/34/50 bili odgurnuti sa leve ivice.                        */
   var ORDER = {
-    'PR': { W: 'C04', N: ['C05','C06','C07','C08','C09','C10','C11'],
+    'PR': { N: ['C04','C05','C06','C07','C08','C09','C10','C11'],
             S: ['C03','C02','C01','CORE','C15','C14','C13','C12','GAR'] },
-    '1':  { W: 'C19', N: ['C20','C21','C22','C23','C24','C25','C26','C27'],
+    '1':  { N: ['C19','C20','C21','C22','C23','C24','C25','C26','C27'],
             S: ['C18','C17','C16','CORE','C31','C30','C29','C28'] },
-    '2':  { W: 'C35', N: ['C36','C37','C38','C39','C40','C41','C42','C43'],
+    '2':  { N: ['C35','C36','C37','C38','C39','C40','C41','C42','C43'],
             S: ['C34','C33','C32','CORE','C47','C46','C45','C44'] },
-    'PK': { W: 'C51', N: ['C52','C53','C54','C55','C56','C57','C58','C59'],
+    'PK': { N: ['C51','C52','C53','C54','C55','C56','C57','C58','C59'],
             S: ['C50','C49','C48','CORE','C63','C62','C61','C60'] }
   };
 
-  var LEN = 64;             // duzina lamele u metrima
+  /* -------------------------------------------- geometrija gabarita -----
+     LEN i DEPTH NISU iz projektne dokumentacije — dokumentacija daje samo
+     povrsine stanova. DEPTH je izveden tako da zbir povrsina oba niza
+     stane u gabarit: pri 16 m nacrtana povrsina odstupa od stvarne najvise
+     ~5%, i to ravnomerno po celoj etazi.
+
+     Sve dimenzije stoje OVDE i izvoze se kao MODUS.geo — app.js ih cita
+     umesto da drzi svoje kopije. Ranije su bile na dva mesta (data.js je
+     racunao sirinu ugaonog stana za dubinu 13 m, app.js ga crtao na
+     14.9 m) pa je taj stan ispadao 11% prevelik.                        */
+  var GEO = {
+    LEN: 64,          // duzina lamele (m)
+    DEPTH: 16,        // dubina gabarita (m)
+    CORR: 2.0,        // sredisnji hodnik (m)
+    PK_INSET: 0.20,   // povlacenje potkrovlja (vidi napomenu ispod)
+    GAP: 0.14,        // fuga izmedju stanova
+    FH: 3.1           // spratna visina (m)
+  };
+  /* NAPOMENA o potkrovlju: po prodajnim listovima PK stanovi imaju ISTU
+     zatvorenu povrsinu kao drugi sprat (T49 = T17 = 53.65 m2), a vece
+     terase. To znaci da se zatvoreni gabarit PK-a prakticno ne uvlaci —
+     zato je PK_INSET samo 0.20 m, tek toliko da se potkrovlje procita.
+     Ako objekat stvarno ima povuceno potkrovlje, onda zatvorene povrsine
+     na listovima 48-63 treba proveriti sa investitorom. */
+
   var CORE_W = { 'PR': 5.5, '1': 4.2, '2': 4.2, 'PK': 4.2 };  // ulazni blok
   var GAR_W = 6.8;          // garaze na istoku prizemlja
-  var FULL_DEPTH = 13.0;    // dubina ugaonog stana punog gabarita
 
   var floors = FLOOR_ORDER.map(function (k, li) {
     var ord = ORDER[k];
-    var wUnit = byId[ord.W];
-    /* zapadni ugaoni stan: sirina iz kvadrature preko pune dubine */
-    var wW = wUnit.zatvoreno / FULL_DEPTH;
-    wUnit.side = 'F';
-    wUnit.lx = 0;
-    wUnit.lw = wW / LEN;
+    var ins = (k === 'PK') ? GEO.PK_INSET : 0;
+    var fw = GEO.LEN - ins * 2;     // sirina gabarita te etaze
+    var fd = GEO.DEPTH - ins * 2;   // dubina gabarita te etaze
 
     var core = null, gar = null;
 
-    /* niz: fiksne sirine za CORE/GAR, ostatak proporcionalno kvadraturi */
+    /* oba niza idu od zapadnog do istocnog kraja (x = 0 .. fw).
+       Fiksne sirine za CORE/GAR, ostatak proporcionalno kvadraturi. */
     function layoutRow(ids, side) {
       var fixed = 0, areaSum = 0;
       ids.forEach(function (id) {
@@ -241,18 +287,18 @@ window.MODUS_DATA = {
         else if (id === 'GAR') fixed += GAR_W;
         else areaSum += byId[id].zatvoreno;
       });
-      var free = LEN - wW - fixed;
-      var x = wW;
+      var free = fw - fixed;
+      var x = 0;
       ids.forEach(function (id) {
         var w;
-        if (id === 'CORE') { w = CORE_W[k]; core = [x / LEN, (x + w) / LEN]; }
-        else if (id === 'GAR') { w = GAR_W; gar = [x / LEN, (x + w) / LEN]; }
+        if (id === 'CORE') { w = CORE_W[k]; core = [x / fw, (x + w) / fw]; }
+        else if (id === 'GAR') { w = GAR_W; gar = [x / fw, (x + w) / fw]; }
         else {
           var u = byId[id];
           w = u.zatvoreno / areaSum * free;
           u.side = side;
-          u.lx = x / LEN;
-          u.lw = w / LEN;
+          u.lx = x / fw;
+          u.lw = w / fw;
         }
         x += w;
       });
@@ -261,15 +307,40 @@ window.MODUS_DATA = {
     layoutRow(ord.S, 'S');
 
     var us = units.filter(function (u) { return u.etaza === k; });
+
+    /* ------------------------------------------- dubine nizova ---------
+       Nizovi NEMAJU istu dubinu. Juzni gubi duzinu na ulazni blok i
+       garaze, pa bi pri deobi 50:50 njegovi stanovi ispali ~14% premali.
+       Zato se dubina svakog niza izvodi iz njegove povrsine i raspolozive
+       duzine, a onda se oba skaliraju da tacno popune gabarit — greska
+       koja ostane je ista za sve stanove na etazi.                      */
+    function rowDepth(side) {
+      var r = us.filter(function (u) { return u.side === side; });
+      var a = 0, wm = 0;
+      r.forEach(function (u) { a += u.zatvoreno; wm += u.lw * fw - GEO.GAP; });
+      return wm ? a / wm : 0;
+    }
+    var dN = rowDepth('N'), dS = rowDepth('S');
+    var sc = (fd - GEO.CORR) / (dN + dS);
+    dN *= sc; dS *= sc;
+
     var areas = us.map(function (u) { return u.ukupno; });
+    var cene = us.map(function (u) { return u.cena; });
     return {
       key: k,
       level: li,
+      minC: Math.min.apply(null, cene),
+      maxC: Math.max.apply(null, cene),
       name: FLOOR_NAMES[k],
       units: us,
       count: us.length,
       core: core,
       gar: gar,
+      inset: ins,
+      fw: fw,
+      fd: fd,
+      depthN: dN,
+      depthS: dS,
       minA: Math.min.apply(null, areas),
       maxA: Math.max.apply(null, areas)
     };
@@ -307,13 +378,32 @@ window.MODUS_DATA = {
   /* ----------------------------------------------------------- format --- */
   function a2(n) { return n.toFixed(2).replace('.', ','); }
 
+  /* ---------------------------------------------------------- kontakt ---
+     Jedinstven izvor za sve sto JS generise (stan.html, poruke formi).
+     Vidljivi kontakt u index.html je namerno staticki HTML — mora da
+     postoji i bez JS-a i da ga pretrazivaci procitaju. Ako se broj menja,
+     menja se OVDE i u sekciji #kontakt + futeru u index.html.           */
+  var KONTAKT = {
+    tel1: '060/6002428',
+    tel1Href: 'tel:+381606002428',
+    tel2: '064/6577756',
+    tel2Href: 'tel:+381646577756',
+    mail: 'office.modusgradnja@gmail.com',
+    instagram: 'https://www.instagram.com/modus_gradnja/',
+    radnoVreme: '8–16h radnim danima'
+  };
+
   window.MODUS = {
     data: D,
+    geo: GEO,
+    kontakt: KONTAKT,
     units: units,
     floors: floors,
     STRUKT: STRUKT,
     FLOOR_NAMES: FLOOR_NAMES,
     dz: { naziv: DZ.naziv, units: dzUnits },
+    cenaM2: CENA_M2,
+    eur: eur,
     getUnit: function (id) { return byId[id] || dzById[id] || null; },
     isDZ: function (id) { return !!dzById[id]; },
     getFloor: function (key) {

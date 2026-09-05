@@ -1,9 +1,31 @@
 <!DOCTYPE html>
-<html lang="sr">
+<html lang="sr-Latn">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Stan — MODUS GRADNJA</title>
+<meta name="description" content="Stan u ponudi MODUS GRADNJA — struktura, kvadratura, terasa, tlocrt i prodajni list iz projektne dokumentacije investitora.">
+<link rel="canonical" href="https://cheef30.github.io/modus-gradnja/stan.html">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#08090b">
+
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="MODUS GRADNJA">
+<meta property="og:locale" content="sr_RS">
+<meta property="og:url" content="https://cheef30.github.io/modus-gradnja/stan.html">
+<meta property="og:title" content="Stan — MODUS GRADNJA">
+<meta property="og:description" content="Struktura, kvadratura, terasa, tlocrt i prodajni list iz projektne dokumentacije investitora.">
+<meta property="og:image" content="https://cheef30.github.io/modus-gradnja/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Stan — MODUS GRADNJA">
+<meta name="twitter:description" content="Struktura, kvadratura, terasa, tlocrt i prodajni list iz projektne dokumentacije investitora.">
+<meta name="twitter:image" content="https://cheef30.github.io/modus-gradnja/og.jpg">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -16,7 +38,7 @@
     <a class="logo" href="index.html" aria-label="MODUS GRADNJA — početna">
       <img src="img/logo.png" alt="MODUS GRADNJA">
     </a>
-    <button class="burger" id="burger" aria-label="Meni">☰</button>
+    <button class="burger" id="burger" aria-label="Meni" aria-expanded="false">☰</button>
     <div class="nav-links" id="navLinks">
       <a href="index.html#o-nama">O nama</a>
       <a href="index.html#stanovi">Stanovi</a>
@@ -29,7 +51,17 @@
   </div>
 </nav>
 
-<main class="sp wrap" id="app"></main>
+<main class="sp wrap" id="app">
+  <noscript>
+    <div class="notfound">
+      <p class="eyebrow" style="justify-content:center">JavaScript je isključen</p>
+      <h2>Podaci o stanu se ne mogu prikazati.</h2>
+      <p class="lead" style="margin:18px auto 30px">Uključite JavaScript ili nas pozovite
+        na <a href="tel:+381606002428" style="color:var(--accent)">060/6002428</a>.</p>
+      <a class="btn btn-primary" href="index.html">Nazad na početnu</a>
+    </div>
+  </noscript>
+</main>
 
 <footer>
   <div class="wrap">
@@ -41,13 +73,7 @@
 </footer>
 
 <script src="data.js"></script>
+<script src="site.js"></script>
 <script src="stan.js"></script>
-<script>
-(function(){
-  var burger=document.getElementById('burger'), links=document.getElementById('navLinks');
-  burger.onclick=function(){ links.classList.toggle('open'); };
-  document.getElementById('yr').textContent=new Date().getFullYear();
-})();
-</script>
 </body>
 </html>

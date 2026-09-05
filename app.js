@@ -12,15 +12,17 @@
   'use strict';
 
   var M = window.MODUS;
-  if (!M || !window.THREE) return;
+  if (!M) return;
 
-  /* ------------------------------------------------------ dimenzije ----- */
-  var L = 64;            // duzina lamele (m)
-  var DEP = 15;          // dubina (m)
-  var FH = 3.1;          // spratna visina
-  var CORR = 2.0;        // sredisnji hodnik
-  var PK_INSET = 1.15;   // povlacenje potkrovlja (krovne terase)
-  var GAP = 0.14;        // fuga izmedju stanova
+  /* ------------------------------------------------------ dimenzije -----
+     Iz data.js (MODUS.geo) — jedno mesto za sve, da 2D osnova i 3D model
+     ne mogu da odu svaka na svoju stranu. */
+  var G = M.geo;
+  var L = G.LEN;             // duzina lamele (m)
+  var DEP = G.DEPTH;         // dubina (m)
+  var FH = G.FH;             // spratna visina
+  var PK_INSET = G.PK_INSET; // povlacenje potkrovlja (krovne terase)
+  var GAP = G.GAP;           // fuga izmedju stanova
 
   /* ---------------------------------------------------------- boje ------ */
   var COL = {
@@ -47,9 +49,8 @@
 
   var stage, canvas, tooltip, panelEl;
   var renderer, scene, camera, raycaster, pointer;
-  var unitMeshes = [];                 // svi mesevi stanova
   var floorHit = [];                   // nevidljivi veliki boksovi za lak pogodak sprata
-  var floorObjects = {};               // key -> {group, meshes, units:{id:mesh}}
+  var floorObjects = {};               // key -> {group, meshes, units:{id:mesh}, pick:[]}
   var logoTex = null;
 
   var cam = {
@@ -64,17 +65,32 @@
   var visible = true;   // sekcija u viewportu i tab aktivan
   function invalidate() { dirty = true; }
 
-  /* ================================================================ INIT */
-  function init() {
+  /* ============================================================== UI INIT
+     Deo koji NE zavisi od Three.js-a: prebacivanje objekta, kartice druge
+     zgrade i lista spratova. Radi odmah, i onda kad 3D nije dostupan.   */
+  function initUI() {
     stage = document.getElementById('stage');
     canvas = document.getElementById('scene');
     tooltip = document.getElementById('tooltip');
     panelEl = document.getElementById('panelBody');
+
+    bindViewToggle();
+    renderApartmentCards();
+    if (panelEl) renderFloorList();
+  }
+
+  /* ================================================================ INIT */
+  function init() {
     if (!stage || !canvas) return;
+
+    /* scena se moze inicijalizovati dok je prikaz kartica aktivan (stage
+       tada nema dimenzije) — uzmi razumne podrazumevane, ResizeObserver
+       ispravlja cim stage postane vidljiv */
+    var w0 = stage.clientWidth || 960, h0 = stage.clientHeight || 640;
 
     renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false, powerPreference: 'high-performance' });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
-    renderer.setSize(stage.clientWidth, stage.clientHeight, false);
+    renderer.setSize(w0, h0, false);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.outputEncoding = THREE.sRGBEncoding;
@@ -85,7 +101,7 @@
     scene.background = new THREE.Color(0x080a0d);
     scene.fog = new THREE.Fog(0x080a0d, 130, 340);
 
-    camera = new THREE.PerspectiveCamera(38, stage.clientWidth / stage.clientHeight, 0.5, 700);
+    camera = new THREE.PerspectiveCamera(38, w0 / h0, 0.5, 700);
     cam.target = new THREE.Vector3(0, 7, 0);
     cam.ttarget = new THREE.Vector3(0, 7, 0);
 
@@ -102,14 +118,10 @@
     bindResize();
     bindVisibility();
 
-    renderFloorList();
     applyStyles();
     S.ready = true;
     var ld = document.getElementById('loader');
     if (ld) ld.classList.add('hide');
-
-    bindViewToggle();
-    renderApartmentCards();
 
     animate();
   }
@@ -262,14 +274,15 @@
       grp.userData.key = f.key;
       grp.userData.offY = 0;
       grp.userData.targetOffY = 0;
-      var rec = { group: grp, meshes: [], units: {}, key: f.key };
+      var rec = { group: grp, meshes: [], units: {}, pick: [], key: f.key };
       floorObjects[f.key] = rec;
 
       var baseY = f.level * FH;
-      var ins = (f.key === 'PK') ? PK_INSET : 0;
-      var fw = L - ins * 2;
-      var fd = DEP - ins * 2;
-      var unitD = (fd - CORR) / 2;
+      var ins = f.inset;
+      var fw = f.fw;
+      var fd = f.fd;
+      var dN = f.depthN;      // dubina severnog niza (racunata iz povrsina)
+      var dS = f.depthS;      // dubina juznog niza — nije ista kao severna
       var unitH = FH - 0.55;
 
       /* medjuspratna ploca — uvek pun gabarit (na PK pravi krovnu terasu) */
@@ -285,9 +298,11 @@
       f.units.forEach(function (u) {
         var w = u.lw * fw - GAP;
         var x = -fw / 2 + (u.lx + u.lw / 2) * fw;
-        var full = (u.side === 'F');
-        var d = full ? (fd - 0.1) : (unitD - 0.1);
-        var z = full ? 0 : (u.side === 'S' ? 1 : -1) * (CORR / 2 + unitD / 2);
+        /* svaki niz ima svoju dubinu i lezi uz svoju fasadu — hodnik
+           izmedju njih zato nije na sredini gabarita */
+        var north = (u.side === 'N');
+        var d = (north ? dN : dS) - 0.1;
+        var z = north ? -(fd / 2 - dN / 2) : (fd / 2 - dS / 2);
         var mat = mkMat({ color: COL.unit, roughness: 0.62, metalness: 0.1, emissive: 0x000000 });
         var mesh = new THREE.Mesh(new THREE.BoxGeometry(Math.max(w, 0.5), unitH, d), mat);
         mesh.position.set(x, baseY + 0.28 + unitH / 2, z);
@@ -295,7 +310,7 @@
         mesh.userData = { unitId: u.id, floorKey: f.key, pick: true };
         add(rec, mesh);
         rec.units[u.id] = mesh;
-        unitMeshes.push(mesh);
+        rec.pick.push(mesh);      /* gotova lista za raycast — bez filter() po hover-u */
       });
 
       /* garaze na istocnom kraju juzne strane prizemlja (mesta 49-53) */
@@ -303,10 +318,10 @@
         var gw = (f.gar[1] - f.gar[0]) * fw - GAP;
         var gx = -fw / 2 + ((f.gar[0] + f.gar[1]) / 2) * fw;
         var gar = new THREE.Mesh(
-          new THREE.BoxGeometry(gw, unitH * 0.9, unitD - 0.1),
+          new THREE.BoxGeometry(gw, unitH * 0.9, dS - 0.1),
           mkMat({ color: 0x1a1c20, roughness: 0.85 })
         );
-        gar.position.set(gx, baseY + 0.28 + unitH * 0.45, CORR / 2 + unitD / 2);
+        gar.position.set(gx, baseY + 0.28 + unitH * 0.45, fd / 2 - dS / 2);
         gar.castShadow = true; gar.receiveShadow = true;
         add(rec, gar);
       }
@@ -441,7 +456,6 @@
     var btnCards = document.getElementById('viewBtnCards');
     var view3d = document.getElementById('view3d');
     var viewCards = document.getElementById('viewCards');
-    var hint3d = document.getElementById('hint3d');
     if (!btn3d || !btnCards) return;
 
     function showView(v) {
@@ -452,7 +466,6 @@
       btnCards.setAttribute('aria-selected', !is3d);
       view3d.hidden = !is3d;
       viewCards.hidden = is3d;
-      if (hint3d) hint3d.hidden = !is3d;
       if (is3d) invalidate();
     }
     btn3d.onclick = function () { showView('3d'); };
@@ -613,8 +626,8 @@
     var prevU = S.hoverUnit, prevF = S.hoverFloor;
 
     if (S.floor !== null) {
-      var list = unitMeshes.filter(function (m) { return m.userData.floorKey === S.floor; });
-      var hits = raycaster.intersectObjects(list, false);
+      var rec = floorObjects[S.floor];
+      var hits = rec ? raycaster.intersectObjects(rec.pick, false) : [];
       if (hits.length) {
         S.hoverUnit = hits[0].object.userData.unitId;
         S.hoverFloor = null;
@@ -656,7 +669,7 @@
       '<b>Stan br. ' + u.num + ' · ' + u.strukt.label + (u.duplex ? ' duplex' : '') + '</b>' +
       '<span style="color:var(--muted)">' + M.a2(u.ukupno) + ' m² · ' + u.etazaNaziv +
       (u.terasa ? ' · terasa ' + M.a2(u.terasa) + ' m²' : '') + '</span>' +
-      '<div class="tp">Klikni za detalje</div>';
+      '<div class="tp">' + M.eur(u.cena) + ' € · klikni za detalje</div>';
     tooltip.style.left = px + 'px';
     tooltip.style.top = py + 'px';
     tooltip.style.opacity = '1';
@@ -673,7 +686,7 @@
     tooltip.style.opacity = '1';
   }
 
-  function hideTip() { tooltip.style.opacity = '0'; }
+  function hideTip() { if (tooltip) tooltip.style.opacity = '0'; }
 
   /* ====================================================== STIL / STANJE */
   function applyStyles() {
@@ -681,6 +694,7 @@
 
     M.floors.forEach(function (f) {
       var rec = floorObjects[f.key];
+      if (!rec) return;                 /* 3D jos nije ucitan — samo DOM deo */
       var selected = (S.floor === f.key);
       var dimmed = (S.floor !== null && !selected);
       var hovered = (S.floor === null && S.hoverFloor === f.key);
@@ -751,24 +765,28 @@
     S.hoverUnit = null; S.hoverFloor = null;
     hideTip();
     if (key === null) {
-      cam.ttarget.set(0, 7, 0);
-      cam.tr = 96;
-      cam.tph = Math.PI * 0.36;
+      if (cam.ttarget) {
+        cam.ttarget.set(0, 7, 0);
+        cam.tr = 96;
+        cam.tph = Math.PI * 0.36;
+      }
       renderFloorList();
     } else {
       var f = M.getFloor(key);
-      /* pticja perspektiva: radius se racuna iz sirine kadra,
-         tako da cela lamela + margina uvek stane na ekran */
-      cam.ttarget.set(0, f.level * FH + 1.6, 0);
-      cam.tr = clamp(fitRadius(16), 105, 185);
-      cam.tph = 0.62;
-      /* blago okreni ka blizoj poduznoj fasadi da lamela lezi horizontalno */
-      var TWO = Math.PI * 2;
-      var a = ((cam.tth % TWO) + TWO) % TWO;
-      var snaps = [0, Math.PI, TWO];
-      var best = snaps[0];
-      snaps.forEach(function (c) { if (Math.abs(a - c) < Math.abs(a - best)) best = c; });
-      cam.tth = cam.tth + (best - a);
+      if (cam.ttarget) {
+        /* pticja perspektiva: radius se racuna iz sirine kadra,
+           tako da cela lamela + margina uvek stane na ekran */
+        cam.ttarget.set(0, f.level * FH + 1.6, 0);
+        cam.tr = clamp(fitRadius(16), 105, 185);
+        cam.tph = 0.62;
+        /* blago okreni ka blizoj poduznoj fasadi da lamela lezi horizontalno */
+        var TWO = Math.PI * 2;
+        var a = ((cam.tth % TWO) + TWO) % TWO;
+        var snaps = [0, Math.PI, TWO];
+        var best = snaps[0];
+        snaps.forEach(function (c) { if (Math.abs(a - c) < Math.abs(a - best)) best = c; });
+        cam.tth = cam.tth + (best - a);
+      }
       renderFloorDetail(key);
     }
     applyStyles();
@@ -813,7 +831,8 @@
     head.innerHTML =
       '<div class="t">Konfigurator stanova</div>' +
       '<h3>Novi stambeni objekat</h3>' +
-      '<p>Pr+2+Pk · ' + st.ukupno + ' stanova · ' + Math.round(st.minA) + '–' + Math.round(st.maxA) + ' m²</p>';
+      '<p>Pr+2+Pk · ' + st.ukupno + ' stanova · ' + Math.round(st.minA) + '–' + Math.round(st.maxA) + ' m²<br>' +
+      '<b style="color:var(--accent);font-weight:600">' + M.eur(M.cenaM2) + ' €/m²</b> sa PDV-om</p>';
 
     var html = chipsHTML();
     html += '<div class="floor-list">';
@@ -823,7 +842,8 @@
       html += '<button class="floor-row" data-lv="' + f.key + '">' +
         '<span class="lv">' + f.key + '</span>' +
         '<span class="fi"><b>' + f.name + '</b>' +
-        '<span>' + n + ' stanova · ' + M.range(f) + '</span></span>' + dotsFor(f) + '</button>';
+        '<span>' + n + ' stanova · ' + M.range(f) + '<br>' +
+        M.eur(f.minC) + '–' + M.eur(f.maxC) + ' €</span></span>' + dotsFor(f) + '</button>';
     });
     html += '</div>';
     panelEl.innerHTML = html;
@@ -863,7 +883,8 @@
         '<span>' + u.beds + (u.beds === 1 ? ' spavaća' : ' spavaće') + '</span>' +
         (u.terasa ? '<span>terasa ' + M.a2(u.terasa) + ' m²</span>' : '') +
         '</div>' +
-        '<div class="uc-price">Cena na upit<small>detalji i tlocrt →</small></div>' +
+        '<div class="uc-price">' + M.eur(u.cena) + ' €' +
+        '<small>' + M.eur(u.cenaM2) + ' €/m² · detalji →</small></div>' +
         '</button>';
     });
     html += '</div>';
@@ -883,16 +904,20 @@
 
   /* ------------------------------------------------------- mini osnova -- */
   function miniPlanSVG(f) {
-    var W = 300, rowH = 46, corr = 12;
-    var H = rowH * 2 + corr;
+    /* visine nizova prate stvarne dubine iz data.js — osnova i 3D model
+       moraju da pokazuju isti raspored */
+    var W = 300, corr = 12, bodyH = 92;
+    var hN = bodyH * f.depthN / (f.depthN + f.depthS);
+    var hS = bodyH - hN;
+    var H = bodyH + corr;
     var s = '<div class="mini-plan"><div class="mt">Šematska osnova etaže — raspored duž lamele</div>';
     s += '<svg viewBox="-4 -4 ' + (W + 8) + ' ' + (H + 22) + '" id="miniPlan">';
     s += '<rect x="-2" y="-2" width="' + (W + 4) + '" height="' + (H + 4) + '" rx="4" fill="none" stroke="rgba(255,255,255,.14)" stroke-dasharray="4 4"/>';
     f.units.forEach(function (u) {
       var x = u.lx * W, w = u.lw * W;
-      var full = (u.side === 'F');
-      var y = full ? 0 : (u.side === 'N' ? 0 : rowH + corr);
-      var h = full ? (rowH * 2 + corr) : rowH;
+      var north = (u.side === 'N');
+      var y = north ? 0 : hN + corr;
+      var h = north ? hN : hS;
       var c = u.strukt.color;
       s += '<g class="u" data-id="' + u.id + '">' +
         '<rect x="' + (x + 1) + '" y="' + y + '" width="' + (w - 2) + '" height="' + h + '" rx="3" ' +
@@ -906,14 +931,14 @@
     function block(seg, label) {
       if (!seg) return '';
       var x0 = seg[0] * W, x1 = seg[1] * W;
-      return '<rect x="' + (x0 + 1) + '" y="' + (rowH + corr) + '" width="' + (x1 - x0 - 2) + '" height="' + rowH + '" rx="3" ' +
+      return '<rect x="' + (x0 + 1) + '" y="' + (hN + corr) + '" width="' + (x1 - x0 - 2) + '" height="' + hS + '" rx="3" ' +
         'fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.18)" stroke-dasharray="3 3" stroke-width="1"/>' +
-        '<text x="' + ((x0 + x1) / 2) + '" y="' + (rowH + corr + rowH / 2 + 2) + '" text-anchor="middle" ' +
+        '<text x="' + ((x0 + x1) / 2) + '" y="' + (hN + corr + hS / 2 + 2) + '" text-anchor="middle" ' +
         'font-size="6.5" fill="rgba(255,255,255,.4)">' + label + '</text>';
     }
     s += block(f.core, 'ULAZ');
     s += block(f.gar, 'GARAŽE');
-    s += '<rect x="0" y="' + rowH + '" width="' + W + '" height="' + corr + '" fill="rgba(255,255,255,.05)"/>';
+    s += '<rect x="0" y="' + hN + '" width="' + W + '" height="' + corr + '" fill="rgba(255,255,255,.05)"/>';
     s += '<text x="' + (W - 2) + '" y="' + (H + 14) + '" text-anchor="end" font-size="7" fill="rgba(255,255,255,.3)">JUG ↓</text>';
     s += '</svg></div>';
     return s;
@@ -991,10 +1016,68 @@
     dirty = anim;   // dok traje animacija ostaje "prljavo", inace se gasi
   }
 
+  /* ====================================================== UCITAVANJE 3D-a
+     three.min.js (600 KB) se ne vuce sa pocetnim ucitavanjem strane, nego
+     tek kad se sekcija konfiguratora priblizi ekranu. Lista spratova i
+     kartice druge zgrade su vec iscrtane i rade bez njega.               */
+  var THREE_URL = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+  var threeAsked = false;
+
+  function stageFallback(msg) {
+    var ld = document.getElementById('loader');
+    if (!ld) return;
+    ld.classList.remove('hide');
+    ld.innerHTML = '<div style="max-width:300px;text-align:center;line-height:1.9;' +
+      'text-transform:none;letter-spacing:normal;font-size:13px">' + msg + '</div>';
+  }
+
+  function loadThree() {
+    if (threeAsked) return;
+    threeAsked = true;
+
+    if (window.THREE) { start3D(); return; }
+
+    var s = document.createElement('script');
+    s.src = THREE_URL;
+    s.async = true;
+    s.onload = start3D;
+    s.onerror = function () {
+      stageFallback('3D prikaz trenutno nije dostupan.<br>' +
+        'Spratovi i stanovi su i dalje u listi pored.');
+    };
+    document.head.appendChild(s);
+  }
+
+  function start3D() {
+    if (!window.THREE) {
+      stageFallback('3D prikaz trenutno nije dostupan.<br>' +
+        'Spratovi i stanovi su i dalje u listi pored.');
+      return;
+    }
+    try {
+      init();
+    } catch (e) {
+      stageFallback('Vaš uređaj ne podržava 3D prikaz.<br>' +
+        'Spratovi i stanovi su i dalje u listi pored.');
+    }
+  }
+
   /* ============================================================== START */
+  function boot() {
+    initUI();
+
+    var sec = document.getElementById('stanovi');
+    if (!sec || !('IntersectionObserver' in window)) { loadThree(); return; }
+
+    var io = new IntersectionObserver(function (es) {
+      if (es[0].isIntersecting) { io.disconnect(); loadThree(); }
+    }, { rootMargin: '500px' });
+    io.observe(sec);
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', boot);
   } else {
-    init();
+    boot();
   }
 })();

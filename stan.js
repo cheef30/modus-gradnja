@@ -7,11 +7,13 @@
   'use strict';
   var M = window.MODUS;
 
-  var TEL_1 = '060/6002428';
-  var TEL_1_HREF = 'tel:+381606002428';
-  var TEL_2 = '064/6577756';
-  var TEL_2_HREF = 'tel:+381646577756';
-  var MAIL = 'office.modusgradnja@gmail.com';
+  /* kontakt dolazi iz data.js — jedno mesto za izmenu */
+  var K = M.kontakt;
+  var TEL_1 = K.tel1;
+  var TEL_1_HREF = K.tel1Href;
+  var TEL_2 = K.tel2;
+  var TEL_2_HREF = K.tel2Href;
+  var MAIL = K.mail;
 
   function q(name) {
     var m = new RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
@@ -44,6 +46,34 @@
   }
 
   document.title = 'Stan ' + (isDZ ? '' : 'br. ') + u.num + ' · ' + u.etazaNaziv + ' — MODUS GRADNJA';
+
+  /* ---------------------------------------------- meta podaci po stanu --
+     Jedna staticka stranica opsluzuje sve stanove, pa se naslov, opis i
+     canonical postavljaju iz podataka — da deljenje linka i indeksiranje
+     pokazuju konkretan stan, a ne genericku stranicu.                    */
+  (function () {
+    var BASE = 'https://cheef30.github.io/modus-gradnja/';
+    var objekatMeta = isDZ ? M.dz.naziv : 'Kneza Sime Markovića';
+    var opis = 'Stan ' + (isDZ ? '' : 'br. ') + u.num + ' — ' +
+      (isDZ ? u.struktura : u.strukt.label).toLowerCase() +
+      ', ' + M.a2(u.ukupno) + ' m², ' + u.etazaNaziv.toLowerCase() +
+      ' · objekat ' + objekatMeta + '. Tlocrt, površine po prostorijama i prodajni list.';
+    var url = BASE + 'stan.html?id=' + encodeURIComponent(u.id);
+
+    function meta(sel, val) {
+      var el = document.querySelector(sel);
+      if (el) el.setAttribute('content', val);
+    }
+    meta('meta[name="description"]', opis);
+    meta('meta[property="og:title"]', document.title);
+    meta('meta[property="og:description"]', opis);
+    meta('meta[property="og:url"]', url);
+    meta('meta[name="twitter:title"]', document.title);
+    meta('meta[name="twitter:description"]', opis);
+
+    var canon = document.querySelector('link[rel="canonical"]');
+    if (canon) canon.setAttribute('href', url);
+  })();
 
   /* ------------------------------------------ prodajni list (slika) ----- */
   function sheetHTML(unit) {
@@ -97,8 +127,11 @@
     (u.terasa ? ' · terasa ' + M.a2(u.terasa) + ' m²' : '') + '</div>' +
     '</div>' +
     '<div class="price-box">' +
-    '<div class="p">Cena na upit</div>' +
-    '<div class="pm">Cenovnik je u pripremi — pozovite <a href="' + TEL_1_HREF + '" style="color:var(--accent)">' + TEL_1 + '</a></div>' +
+    (u.cena
+      ? '<div class="p">' + M.eur(u.cena) + ' €</div>' +
+        '<div class="pm">' + M.eur(u.cenaM2) + ' €/m² sa PDV-om · ' + M.a2(u.ukupno) + ' m²</div>'
+      : '<div class="p">Cena na upit</div>' +
+        '<div class="pm">Cenovnik je u pripremi — pozovite <a href="' + TEL_1_HREF + '" style="color:var(--accent)">' + TEL_1 + '</a></div>') +
     '</div></div>';
 
   html += '<div class="sp-grid">';
@@ -136,6 +169,10 @@
       (u.redukovano ? row('Redukovana (−3%)', M.a2(u.redukovano) + ' m²') : '') +
       row('Grejanje', 'Centralno gradsko') +
       row('Status', 'U ponudi') +
+      (u.cena
+        ? row('Cena po m²', M.eur(u.cenaM2) + ' € <span style="color:var(--muted-2);font-weight:400">sa PDV-om</span>') +
+          row('Cena stana', '<span style="color:var(--accent);font-weight:600">' + M.eur(u.cena) + ' €</span>')
+        : '') +
     '</div>' +
     '<div class="cta-row">' +
       '<a class="btn btn-primary" href="' + TEL_1_HREF + '">Pozovi ' + TEL_1 + '</a>' +
@@ -148,7 +185,7 @@
         '<a href="' + TEL_1_HREF + '">' + TEL_1 + '</a>' +
         '<a href="' + TEL_2_HREF + '">' + TEL_2 + '</a>' +
         '<a href="mailto:' + MAIL + '">' + MAIL + '</a>' +
-        '<span>Radno vreme: 8–16h radnim danima</span>' +
+        '<span>Radno vreme: ' + K.radnoVreme + '</span>' +
       '</div>' +
     '</div>' +
     '</div></div>';
@@ -183,7 +220,10 @@
         '<span>' + x.beds + (x.beds === 1 ? ' spavaća' : ' spavaće') + '</span>' +
         (x.terasa ? '<span>terasa ' + M.a2(x.terasa) + ' m²</span>' : '') +
         '</div>' +
-        (x.duplex ? '<div class="uc-price" style="font-size:12.5px">Duplex — dva nivoa</div>' : '') +
+        (x.cena
+          ? '<div class="uc-price">' + M.eur(x.cena) + ' €' +
+            (x.duplex ? '<small>duplex — dva nivoa</small>' : '') + '</div>'
+          : (x.duplex ? '<div class="uc-price" style="font-size:12.5px">Duplex — dva nivoa</div>' : '')) +
         '</a>';
     });
     html += '</div></section>';
@@ -205,7 +245,7 @@
         ' (' + u.strukt.label.toLowerCase() + ', ' + M.a2(u.ukupno) + ' m², ' +
         u.etazaNaziv.toLowerCase() + '). Molim vas da me kontaktirate.</textarea></div>' +
       '<button class="btn btn-primary" type="submit" style="grid-column:1/-1;justify-content:center">Pošalji upit</button>' +
-      '<p class="form-note" id="uNote">Upit se šalje na ' + MAIL + ' preko vašeg email programa.</p>' +
+      '<p class="form-note" id="uNote">Upit stiže direktno prodaji na ' + MAIL + '.</p>' +
     '</form>' +
     '</section>';
 
@@ -215,9 +255,13 @@
     return '<div class="r"><span>' + k + '</span><b>' + v + '</b></div>';
   }
 
-  /* slanje upita — FormSubmit prosledjuje na mejl prodaje */
+  /* slanje upita — mamac, vremenska zamka i slanje su u site.js */
   var uf = document.getElementById('unitForm');
-  if (uf) {
+  var UI = window.MODUS_UI;
+  if (uf && UI) {
+    var guard = UI.protect(uf);
+    var POTVRDA = 'Hvala! Upit je poslat — javljamo se u najkraćem roku.';
+
     uf.addEventListener('submit', function (e) {
       e.preventDefault();
       var ime = (document.getElementById('uIme').value || '').trim();
@@ -225,38 +269,40 @@
       var msg = (document.getElementById('uMsg').value || '').trim();
       var note = document.getElementById('uNote');
       var btn = uf.querySelector('button[type=submit]');
+
       if (!ime || !tel) {
-        note.textContent = 'Molimo unesite ime i broj telefona.';
-        note.style.color = '#e0655a';
+        UI.err(note, 'Molimo unesite ime i broj telefona.');
         return;
       }
+
+      /* mamac popunjen — pokazi potvrdu, ali nista ne salji */
+      if (guard.isBot()) {
+        UI.ok(note, POTVRDA);
+        uf.reset();
+        btn.disabled = true;
+        btn.textContent = 'Upit poslat ✓';
+        return;
+      }
+
       btn.disabled = true;
       btn.textContent = 'Slanje…';
-      fetch('https://formsubmit.co/ajax/' + MAIL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({
-          _subject: 'Upit — ' + naslov + ', ' + objekat,
-          _template: 'table',
-          _captcha: 'false',
-          'Objekat': objekat,
-          'Stan': naslov + ' — ' + u.strukt.label + ', ' + M.a2(u.ukupno) + ' m², ' + u.etazaNaziv,
-          'Ime i prezime': ime,
-          'Telefon': tel,
-          'Poruka': msg
-        })
-      }).then(function (r) { return r.json(); }).then(function (d) {
-        if (d && (d.success === 'true' || d.success === true)) {
-          note.textContent = 'Hvala! Upit je poslat — javljamo se u najkraćem roku.';
-          note.style.color = '#4ade80';
-          uf.reset();
-          btn.textContent = 'Upit poslat ✓';
-        } else {
-          throw new Error('fs');
-        }
+
+      UI.send({
+        _subject: 'Upit — ' + naslov + ', ' + objekat,
+        _template: 'table',
+        _captcha: 'false',
+        'Objekat': objekat,
+        'Stan': naslov + ' — ' + u.strukt.label + ', ' + M.a2(u.ukupno) + ' m², ' + u.etazaNaziv,
+        'Cena': u.cena ? (M.eur(u.cena) + ' € (' + M.eur(u.cenaM2) + ' €/m² sa PDV-om)') : 'na upit',
+        'Ime i prezime': ime,
+        'Telefon': tel,
+        'Poruka': msg
+      }, guard.hold()).then(function () {
+        UI.ok(note, POTVRDA);
+        uf.reset();
+        btn.textContent = 'Upit poslat ✓';
       }).catch(function () {
-        note.textContent = 'Slanje trenutno nije moguće — pozovite ' + TEL_1 + ' ili pišite na ' + MAIL + '.';
-        note.style.color = '#e0655a';
+        UI.err(note, 'Slanje trenutno nije moguće — pozovite ' + TEL_1 + ' ili pišite na ' + MAIL + '.');
         btn.disabled = false;
         btn.textContent = 'Pošalji upit';
       });

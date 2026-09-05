@@ -11,7 +11,7 @@
   --line-2:rgba(255,255,255,.16);
   --txt:#eceae5;
   --muted:#8d929b;
-  --muted-2:#666b74;
+  --muted-2:#7a8089;
   --accent:#c8a86b;
   --accent-2:#e3cb96;
   --ok:#4ade80;
@@ -449,4 +449,33 @@ footer{border-top:1px solid var(--line);padding:56px 0 34px;background:#07080a}
   .wrap{padding:0 20px}
   .hero-stats{gap:32px;margin-top:48px}
   .price-box{text-align:left}
+}
+
+/* ---------- mamac za automate (honeypot) ----------
+   Van ekrana umesto display:none — deo automata preskace sakrivena
+   polja, ali skoro nijedan ne proverava poziciju.                     */
+.hp{
+  position:absolute!important;left:-9999px!important;top:auto!important;
+  width:1px!important;height:1px!important;overflow:hidden!important;
+}
+
+/* ---------- kartice referenci (sekcija Projekti) ---------- */
+.proj-card{padding:0;overflow:hidden}
+.proj-card img{
+  width:100%;height:280px;object-fit:contain;
+  background:#0d1014;display:block;
+}
+.proj-card .pc-body{padding:24px 26px 28px}
+
+/* ---------- postovanje sistemske postavke za smanjeno kretanje ---------- */
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  .rv{opacity:1;transform:none;transition:none}
+  .apt-card:hover,.card:hover,.btn-primary:hover,.sheet-box:hover{transform:none}
+  .apt-card:hover .ac-photo img{transform:none}
+  .unit-card:hover{transform:none}
+  *,*::before,*::after{
+    animation-duration:.01ms!important;animation-iteration-count:1!important;
+    transition-duration:.01ms!important;scroll-behavior:auto!important;
+  }
 }
