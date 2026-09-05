@@ -112,7 +112,18 @@
     },
 
     ok: function (note, text) { note.textContent = text; note.style.color = '#4ade80'; },
-    err: function (note, text) { note.textContent = text; note.style.color = '#e0655a'; }
+    err: function (note, text) { note.textContent = text; note.style.color = '#e0655a'; },
+
+    /* Mejl je neobavezan — prazan prolazi. Ako je unet, mora da lici na
+       adresu, inace odgovor nema gde da stigne a korisnik to ne zna. */
+    validEmail: function (v) {
+      return !v || /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
+    },
+
+    /* Telefon: cifre, razmaci, +, -, /, zagrade — najmanje 6 cifara. */
+    validTel: function (v) {
+      return (v.replace(/\D/g, '').length >= 6) && /^[\d\s+\-/()]+$/.test(v);
+    }
   };
 
   /* ================================================ FORMA NA POCETNOJ */
@@ -127,9 +138,20 @@
       var btn = lead.querySelector('button[type=submit]');
       var ime = (lead.ime.value || '').trim();
       var tel = (lead.tel.value || '').trim();
+      var mail = (lead.mail.value || '').trim();
 
       if (!ime || !tel) {
         window.MODUS_UI.err(note, 'Molimo unesite ime i broj telefona.');
+        return;
+      }
+      if (!window.MODUS_UI.validTel(tel)) {
+        window.MODUS_UI.err(note, 'Proverite broj telefona.');
+        lead.tel.focus();
+        return;
+      }
+      if (!window.MODUS_UI.validEmail(mail)) {
+        window.MODUS_UI.err(note, 'Proverite e-mail adresu.');
+        lead.mail.focus();
         return;
       }
 
@@ -151,7 +173,7 @@
         _captcha: 'false',
         'Ime i prezime': ime,
         'Telefon': tel,
-        'E-mail': (lead.mail.value || '').trim(),
+        'E-mail': mail,
         'Interesuje me': lead.interes.value,
         'Poruka': (lead.poruka.value || '').trim()
       }, guard.hold()).then(function () {

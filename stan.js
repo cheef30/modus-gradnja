@@ -127,11 +127,8 @@
     (u.terasa ? ' · terasa ' + M.a2(u.terasa) + ' m²' : '') + '</div>' +
     '</div>' +
     '<div class="price-box">' +
-    (u.cena
-      ? '<div class="p">' + M.eur(u.cena) + ' €</div>' +
-        '<div class="pm">' + M.eur(u.cenaM2) + ' €/m² sa PDV-om · ' + M.a2(u.ukupno) + ' m²</div>'
-      : '<div class="p">Cena na upit</div>' +
-        '<div class="pm">Cenovnik je u pripremi — pozovite <a href="' + TEL_1_HREF + '" style="color:var(--accent)">' + TEL_1 + '</a></div>') +
+    '<div class="p">' + M.eur(u.cena) + ' €</div>' +
+    '<div class="pm">' + M.eur(u.cenaM2) + ' €/m² sa PDV-om · ' + M.a2(u.ukupno) + ' m²</div>' +
     '</div></div>';
 
   html += '<div class="sp-grid">';
@@ -169,10 +166,8 @@
       (u.redukovano ? row('Redukovana (−3%)', M.a2(u.redukovano) + ' m²') : '') +
       row('Grejanje', 'Centralno gradsko') +
       row('Status', 'U ponudi') +
-      (u.cena
-        ? row('Cena po m²', M.eur(u.cenaM2) + ' € <span style="color:var(--muted-2);font-weight:400">sa PDV-om</span>') +
-          row('Cena stana', '<span style="color:var(--accent);font-weight:600">' + M.eur(u.cena) + ' €</span>')
-        : '') +
+      row('Cena po m²', M.eur(u.cenaM2) + ' € <span style="color:var(--muted-2);font-weight:400">sa PDV-om</span>') +
+      row('Cena stana', '<span style="color:var(--accent);font-weight:600">' + M.eur(u.cena) + ' €</span>') +
     '</div>' +
     '<div class="cta-row">' +
       '<a class="btn btn-primary" href="' + TEL_1_HREF + '">Pozovi ' + TEL_1 + '</a>' +
@@ -220,10 +215,8 @@
         '<span>' + x.beds + (x.beds === 1 ? ' spavaća' : ' spavaće') + '</span>' +
         (x.terasa ? '<span>terasa ' + M.a2(x.terasa) + ' m²</span>' : '') +
         '</div>' +
-        (x.cena
-          ? '<div class="uc-price">' + M.eur(x.cena) + ' €' +
-            (x.duplex ? '<small>duplex — dva nivoa</small>' : '') + '</div>'
-          : (x.duplex ? '<div class="uc-price" style="font-size:12.5px">Duplex — dva nivoa</div>' : '')) +
+        '<div class="uc-price">' + M.eur(x.cena) + ' €' +
+        (x.duplex ? '<small>duplex — dva nivoa</small>' : '') + '</div>' +
         '</a>';
     });
     html += '</div></section>';
@@ -245,7 +238,10 @@
         ' (' + u.strukt.label.toLowerCase() + ', ' + M.a2(u.ukupno) + ' m², ' +
         u.etazaNaziv.toLowerCase() + '). Molim vas da me kontaktirate.</textarea></div>' +
       '<button class="btn btn-primary" type="submit" style="grid-column:1/-1;justify-content:center">Pošalji upit</button>' +
-      '<p class="form-note" id="uNote">Upit stiže direktno prodaji na ' + MAIL + '.</p>' +
+      '<p class="privacy-note">Slanjem upita pristajete da vaše ime i kontakt koristimo isključivo ' +
+      'da vam odgovorimo na upit. Podatke ne prosleđujemo trećim licima. Brisanje možete tražiti ' +
+      'u svakom trenutku na <a href="mailto:' + MAIL + '">' + MAIL + '</a>.</p>' +
+      '<p class="form-note" id="uNote" role="status" aria-live="polite">Upit stiže direktno prodaji na ' + MAIL + '.</p>' +
     '</form>' +
     '</section>';
 
@@ -274,6 +270,11 @@
         UI.err(note, 'Molimo unesite ime i broj telefona.');
         return;
       }
+      if (!UI.validTel(tel)) {
+        UI.err(note, 'Proverite broj telefona.');
+        document.getElementById('uTel').focus();
+        return;
+      }
 
       /* mamac popunjen — pokazi potvrdu, ali nista ne salji */
       if (guard.isBot()) {
@@ -293,7 +294,7 @@
         _captcha: 'false',
         'Objekat': objekat,
         'Stan': naslov + ' — ' + u.strukt.label + ', ' + M.a2(u.ukupno) + ' m², ' + u.etazaNaziv,
-        'Cena': u.cena ? (M.eur(u.cena) + ' € (' + M.eur(u.cenaM2) + ' €/m² sa PDV-om)') : 'na upit',
+        'Cena': M.eur(u.cena) + ' € (' + M.eur(u.cenaM2) + ' €/m² sa PDV-om)',
         'Ime i prezime': ime,
         'Telefon': tel,
         'Poruka': msg

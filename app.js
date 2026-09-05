@@ -491,7 +491,8 @@
         '<span>' + u.beds + (u.beds === 1 ? ' spavaća' : ' spavaće') + '</span>' +
         (u.terasa ? '<span>Terasa ' + M.a2(u.terasa) + ' m²</span>' : '') +
         '</div>' +
-        '<div class="ac-price"><b>Cena na upit</b><small>cenovnik uskoro</small></div>' +
+        '<div class="ac-price"><b>' + M.eur(u.cena) + ' €</b>' +
+        '<small>' + M.eur(u.cenaM2) + ' €/m² sa PDV-om</small></div>' +
         '<a class="ac-cta" href="stan.html?id=' + u.id + '">Pogledaj detalje stana</a>' +
         '</div></div>';
     });

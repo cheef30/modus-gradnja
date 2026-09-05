@@ -167,14 +167,13 @@ window.MODUS_DATA = {
   var FLOOR_NAMES = { 'PR': 'Prizemlje', '1': 'Prvi sprat', '2': 'Drugi sprat', 'PK': 'Potkrovlje' };
 
   /* ------------------------------------------------------------ cene ----
-     Objekat Kneza Sime Markovica: 1760 EUR/m2 SA PDV-om.
-     Obracunska povrsina je UKUPNA NETO (zatvoreno + terasa), onako kako
-     stoji na prodajnim listovima — terase se naplacuju punom kvadraturom,
-     bez redukcije.
+     Cene su SA PDV-om, po objektu. Obracunska povrsina je UKUPNA NETO
+     (zatvoreno + terasa), onako kako stoji na prodajnim listovima —
+     terase se naplacuju punom kvadraturom, bez redukcije.
 
-     Objekat Milosa Obrenovica NEMA cenu — tamo i dalje stoji "na upit".
-     Za promenu cene menja se samo ova jedna vrednost.                   */
-  var CENA_M2 = 1760;
+     Za promenu cene menja se samo vrednost ovde.                       */
+  var CENA_M2 = 1760;      // Kneza Sime Markovica
+  var CENA_M2_DZ = 2200;   // Milosa Obrenovica
 
   /* 74994 -> "74.994" */
   function eur(n) {
@@ -369,7 +368,9 @@ window.MODUS_DATA = {
       zatvoreno: Math.round((t.ukupno - t.terasa) * 100) / 100,
       rooms: rooms,
       beds: rooms.filter(function (r) { return /spavaca/i.test(r.n); }).length,
-      list: t.list
+      list: t.list,
+      cenaM2: CENA_M2_DZ,
+      cena: Math.round(t.ukupno * CENA_M2_DZ)
     };
   });
   var dzById = {};
@@ -401,7 +402,7 @@ window.MODUS_DATA = {
     floors: floors,
     STRUKT: STRUKT,
     FLOOR_NAMES: FLOOR_NAMES,
-    dz: { naziv: DZ.naziv, units: dzUnits },
+    dz: { naziv: DZ.naziv, units: dzUnits, cenaM2: CENA_M2_DZ },
     cenaM2: CENA_M2,
     eur: eur,
     getUnit: function (id) { return byId[id] || dzById[id] || null; },

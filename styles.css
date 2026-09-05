@@ -471,6 +471,14 @@ footer{border-top:1px solid var(--line);padding:56px 0 34px;background:#07080a}
   .price-box{text-align:left}
 }
 
+/* ---------- napomena o obradi podataka ---------- */
+.privacy-note{
+  grid-column:1/-1;margin:14px 0 0;font-size:11.5px;line-height:1.55;
+  color:var(--muted-2);max-width:62ch;
+}
+.privacy-note a{color:var(--muted);text-decoration:underline;text-underline-offset:2px}
+.privacy-note a:hover{color:var(--accent)}
+
 /* ---------- mamac za automate (honeypot) ----------
    Van ekrana umesto display:none — deo automata preskace sakrivena
    polja, ali skoro nijedan ne proverava poziciju.                     */
