@@ -175,6 +175,26 @@ window.MODUS_DATA = {
   var CENA_M2 = 1760;      // Kneza Sime Markovica
   var CENA_M2_DZ = 2200;   // Milosa Obrenovica
 
+  /* -------------------------------------------------------- statusi ----
+     Podrazumevano je SVAKI stan slobodan. Ovde se upisuju samo izuzeci:
+
+       var STATUSI = { 'C05': 'rezervisan', 'C12': 'prodat', 'M13': 'prodat' };
+
+     Prazan objekat znaci da su svi slobodni. Prodati stanovi se u listi i
+     u 3D prikazu prigusuju i ne mogu se otvoriti.                      */
+  var STATUSI = {};
+
+  var STATUS = {
+    slobodan:   { label: 'Slobodan',   color: '#4ade80', dostupan: true  },
+    rezervisan: { label: 'Rezervisan', color: '#f0b429', dostupan: true  },
+    prodat:     { label: 'Prodat',     color: '#6f757e', dostupan: false }
+  };
+
+  function statusOf(id) {
+    var k = STATUSI[id];
+    return STATUS[k] ? k : 'slobodan';
+  }
+
   /* 74994 -> "74.994" */
   function eur(n) {
     return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
@@ -209,7 +229,8 @@ window.MODUS_DATA = {
       strukt: st,
       list: j.list,
       cenaM2: CENA_M2,
-      cena: Math.round(t.ukupno * CENA_M2)   /* osnovica: ukupna neto */
+      cena: Math.round(t.ukupno * CENA_M2),  /* osnovica: ukupna neto */
+      status: statusOf(j.id)
     };
   });
 
@@ -370,7 +391,8 @@ window.MODUS_DATA = {
       beds: rooms.filter(function (r) { return /spavaca/i.test(r.n); }).length,
       list: t.list,
       cenaM2: CENA_M2_DZ,
-      cena: Math.round(t.ukupno * CENA_M2_DZ)
+      cena: Math.round(t.ukupno * CENA_M2_DZ),
+      status: statusOf('M' + j.broj)
     };
   });
   var dzById = {};
@@ -401,6 +423,7 @@ window.MODUS_DATA = {
     units: units,
     floors: floors,
     STRUKT: STRUKT,
+    STATUS: STATUS,
     FLOOR_NAMES: FLOOR_NAMES,
     dz: { naziv: DZ.naziv, units: dzUnits, cenaM2: CENA_M2_DZ },
     cenaM2: CENA_M2,

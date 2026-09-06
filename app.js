@@ -479,9 +479,12 @@
     var html = '';
     M.dz.units.forEach(function (u) {
       html += '<div class="apt-card">' +
-        '<a class="ac-img ac-photo" href="stan.html?id=' + u.id + '">' +
+        '<a class="ac-img ac-photo" href="' + stanURL(u.id) + '">' +
         '<img src="img/druga-zgrada/' + encodeURIComponent(u.list) + '" alt="Stan ' + u.num + ' — ' + u.struktura + '" loading="lazy">' +
         '<span class="ac-tag pill" style="background:' + u.color + '22;color:' + u.color + '">' + u.struktura + '</span>' +
+        (u.status !== 'slobodan'
+          ? '<span class="ac-tag pill" style="margin-left:6px;background:' + M.STATUS[u.status].color +
+            '22;color:' + M.STATUS[u.status].color + '">' + M.STATUS[u.status].label + '</span>' : '') +
         '</a>' +
         '<div class="ac-body">' +
         '<h3>Stan ' + u.num + '</h3>' +
@@ -493,7 +496,7 @@
         '</div>' +
         '<div class="ac-price"><b>' + M.eur(u.cena) + ' €</b>' +
         '<small>' + M.eur(u.cenaM2) + ' €/m² sa PDV-om</small></div>' +
-        '<a class="ac-cta" href="stan.html?id=' + u.id + '">Pogledaj detalje stana</a>' +
+        '<a class="ac-cta" href="' + stanURL(u.id) + '">Pogledaj detalje stana</a>' +
         '</div></div>';
     });
     host.innerHTML = html;
@@ -660,8 +663,14 @@
   }
 
   function openUnit(id) {
-    window.location.href = 'stan.html?id=' + encodeURIComponent(id);
+    var u = M.getUnit(id);
+    /* prodat stan nema svoju ponudu — ne vodi nikuda */
+    if (u && !M.STATUS[u.status].dostupan) return;
+    window.location.href = stanURL(id);
   }
+
+  /* staticka stranica po stanu — vidi build-stanovi.js */
+  function stanURL(id) { return 'stan/' + id + '.html'; }
 
   /* ----------------------------------------------------------- tooltip */
   function showUnitTip(px, py, u) {
@@ -670,7 +679,8 @@
       '<b>Stan br. ' + u.num + ' · ' + u.strukt.label + (u.duplex ? ' duplex' : '') + '</b>' +
       '<span style="color:var(--muted)">' + M.a2(u.ukupno) + ' m² · ' + u.etazaNaziv +
       (u.terasa ? ' · terasa ' + M.a2(u.terasa) + ' m²' : '') + '</span>' +
-      '<div class="tp">' + M.eur(u.cena) + ' € · klikni za detalje</div>';
+      '<div class="tp">' + M.eur(u.cena) + ' € · ' +
+      (M.STATUS[u.status].dostupan ? 'klikni za detalje' : M.STATUS[u.status].label) + '</div>';
     tooltip.style.left = px + 'px';
     tooltip.style.top = py + 'px';
     tooltip.style.opacity = '1';
@@ -729,7 +739,10 @@
         var mesh = rec.units[u.id];
         var mat = mesh.material;
         var isHover = (S.hoverUnit === u.id);
-        var matchesFilter = (S.filter === 'all' || u.strukt.key === S.filter);
+        var dostupan = M.STATUS[u.status].dostupan;
+        /* prodat stan se ne boji po strukturi — nije vise u ponudi */
+        var matchesFilter = dostupan &&
+          (S.filter === 'all' || u.strukt.key === S.filter);
 
         if (selected) {
           mat.color.setHex(COL.unitLit);
@@ -876,16 +889,21 @@
     html += miniPlanSVG(f);
     html += '<div class="unit-list">';
     shown.forEach(function (u) {
-      html += '<button class="unit-card" data-id="' + u.id + '">' +
+      var st = M.STATUS[u.status];
+      var prodat = !st.dostupan;
+      html += '<button class="unit-card' + (prodat ? ' sold' : '') + '" data-id="' + u.id + '"' +
+        (prodat ? ' disabled aria-disabled="true"' : '') + '>' +
         '<div class="uc-top"><b>Stan br. ' + u.num + '</b>' +
         '<span class="pill ' + u.strukt.key + '">' + u.strukt.label + (u.duplex ? ' · duplex' : '') + '</span></div>' +
         '<div class="uc-meta">' +
         '<span>' + M.a2(u.ukupno) + ' m²</span>' +
         '<span>' + u.beds + (u.beds === 1 ? ' spavaća' : ' spavaće') + '</span>' +
         (u.terasa ? '<span>terasa ' + M.a2(u.terasa) + ' m²</span>' : '') +
+        (u.status !== 'slobodan'
+          ? '<span style="color:' + st.color + ';font-weight:600">' + st.label + '</span>' : '') +
         '</div>' +
         '<div class="uc-price">' + M.eur(u.cena) + ' €' +
-        '<small>' + M.eur(u.cenaM2) + ' €/m² · detalji →</small></div>' +
+        '<small>' + (prodat ? 'prodato' : M.eur(u.cenaM2) + ' €/m² · detalji →') + '</small></div>' +
         '</button>';
     });
     html += '</div>';
@@ -919,8 +937,10 @@
       var north = (u.side === 'N');
       var y = north ? 0 : hN + corr;
       var h = north ? hN : hS;
-      var c = u.strukt.color;
-      s += '<g class="u" data-id="' + u.id + '">' +
+      var stU = M.STATUS[u.status];
+      /* prodat se crta sivo, kao i u 3D prikazu */
+      var c = stU.dostupan ? u.strukt.color : stU.color;
+      s += '<g class="u' + (stU.dostupan ? '' : ' sold') + '" data-id="' + u.id + '">' +
         '<rect x="' + (x + 1) + '" y="' + y + '" width="' + (w - 2) + '" height="' + h + '" rx="3" ' +
         'fill="' + c + '" fill-opacity="0.13" stroke="' + c + '" stroke-opacity="0.7" stroke-width="1.1"/>' +
         '<text x="' + (x + w / 2) + '" y="' + (y + h / 2 - 2) + '" text-anchor="middle" ' +

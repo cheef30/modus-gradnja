@@ -21,8 +21,18 @@
   }
 
   var app = document.getElementById('app');
-  var id = q('id');
+  /* Staticke stranice (stan/C01.html) upisuju id u MODUS_STAN_ID.
+     Stari oblik stan.html?id=C01 i dalje radi — postoje podeljeni linkovi. */
+  var staticPage = !!window.MODUS_STAN_ID;
+  var id = window.MODUS_STAN_ID || q('id');
   var u = id ? M.getUnit(id) : null;
+
+  /* Isti kod crta stranicu i iz korena i iz stan/ foldera, pa linkovi
+     moraju da znaju gde se nalaze. */
+  var ROOT = staticPage ? '../' : '';
+  function stanURL(sid) {
+    return staticPage ? sid + '.html' : 'stan.html?id=' + encodeURIComponent(sid);
+  }
 
   if (!u) {
     app.innerHTML =
@@ -30,7 +40,7 @@
       '<p class="eyebrow" style="justify-content:center">Greška 404</p>' +
       '<h2>Stan nije pronađen.</h2>' +
       '<p class="lead" style="margin:18px auto 30px">Proverite link ili se vratite na pregled svih stanova.</p>' +
-      '<a class="btn btn-primary" href="index.html#stanovi">Nazad na pregled stanova</a></div>';
+      '<a class="btn btn-primary" href="' + ROOT + 'index.html#stanovi">Nazad na pregled stanova</a></div>';
     return;
   }
 
@@ -48,38 +58,41 @@
   document.title = 'Stan ' + (isDZ ? '' : 'br. ') + u.num + ' · ' + u.etazaNaziv + ' — MODUS GRADNJA';
 
   /* ---------------------------------------------- meta podaci po stanu --
-     Jedna staticka stranica opsluzuje sve stanove, pa se naslov, opis i
-     canonical postavljaju iz podataka — da deljenje linka i indeksiranje
-     pokazuju konkretan stan, a ne genericku stranicu.                    */
-  (function () {
-    var BASE = 'https://cheef30.github.io/modus-gradnja/';
-    var objekatMeta = isDZ ? M.dz.naziv : 'Kneza Sime Markovića';
-    var opis = 'Stan ' + (isDZ ? '' : 'br. ') + u.num + ' — ' +
-      (isDZ ? u.struktura : u.strukt.label).toLowerCase() +
-      ', ' + M.a2(u.ukupno) + ' m², ' + u.etazaNaziv.toLowerCase() +
-      ' · objekat ' + objekatMeta + '. Tlocrt, površine po prostorijama i prodajni list.';
-    var url = BASE + 'stan.html?id=' + encodeURIComponent(u.id);
+     Na statickim stranicama (stan/C01.html) meta oznake vec stoje u samom
+     fajlu — tako ih vide skeneri linkova koji ne pokrecu JS. Ovde se
+     dopunjuju samo za stari oblik stan.html?id=..., da i on nesto kaze. */
+  if (!staticPage) {
+    (function () {
+      var BASE = 'https://cheef30.github.io/modus-gradnja/';
+      var objekatMeta = isDZ ? M.dz.naziv : 'Kneza Sime Markovića';
+      var opis = 'Stan ' + (isDZ ? '' : 'br. ') + u.num + ' — ' +
+        (isDZ ? u.struktura : u.strukt.label).toLowerCase() +
+        ', ' + M.a2(u.ukupno) + ' m², ' + u.etazaNaziv.toLowerCase() +
+        ' · objekat ' + objekatMeta + '. Tlocrt, površine po prostorijama i prodajni list.';
+      var url = BASE + 'stan/' + u.id + '.html';
 
-    function meta(sel, val) {
-      var el = document.querySelector(sel);
-      if (el) el.setAttribute('content', val);
-    }
-    meta('meta[name="description"]', opis);
-    meta('meta[property="og:title"]', document.title);
-    meta('meta[property="og:description"]', opis);
-    meta('meta[property="og:url"]', url);
-    meta('meta[name="twitter:title"]', document.title);
-    meta('meta[name="twitter:description"]', opis);
+      function meta(sel, val) {
+        var el = document.querySelector(sel);
+        if (el) el.setAttribute('content', val);
+      }
+      meta('meta[name="description"]', opis);
+      meta('meta[property="og:title"]', document.title);
+      meta('meta[property="og:description"]', opis);
+      meta('meta[property="og:url"]', url);
+      meta('meta[name="twitter:title"]', document.title);
+      meta('meta[name="twitter:description"]', opis);
 
-    var canon = document.querySelector('link[rel="canonical"]');
-    if (canon) canon.setAttribute('href', url);
-  })();
+      /* canonical uvek pokazuje na staticku stranicu — jedna adresa po stanu */
+      var canon = document.querySelector('link[rel="canonical"]');
+      if (canon) canon.setAttribute('href', url);
+    })();
+  }
 
   /* ------------------------------------------ prodajni list (slika) ----- */
   function sheetHTML(unit) {
     var src = isDZ
-      ? 'img/druga-zgrada/' + encodeURIComponent(unit.list)
-      : 'img/stanovi-web/' + unit.list;
+      ? ROOT + 'img/druga-zgrada/' + encodeURIComponent(unit.list)
+      : ROOT + 'img/stanovi-web/' + unit.list;
     return '<a class="sheet-box" href="' + src + '" target="_blank" rel="noopener" ' +
       'title="Otvori prodajni list u punoj veličini">' +
       '<img src="' + src + '" alt="Stan br. ' + unit.num + ' — prodajni list sa tlocrtom" loading="lazy">' +
@@ -109,6 +122,7 @@
 
   /* ------------------------------------------------------------- render */
   var strukt = u.strukt;
+  var ST = M.STATUS[u.status];
   var naslov = 'Stan ' + (isDZ ? '' : 'br. ') + u.num;
   var objekat = isDZ ? u.objekat : 'Kneza Sime Markovića';
   var pillAttr = isDZ
@@ -116,12 +130,14 @@
     : '';
 
   var html = '';
-  html += '<div class="crumb"><a href="index.html">Početna</a> · <a href="index.html#stanovi">Stanovi</a> · ' +
+  html += '<div class="crumb"><a href="' + ROOT + 'index.html">Početna</a> · ' +
+    '<a href="' + ROOT + 'index.html#stanovi">Stanovi</a> · ' +
     '<span>' + objekat + '</span> · <span style="color:var(--txt)">' + naslov + '</span></div>';
 
   html += '<div class="sp-head">' +
     '<div>' +
     '<span class="pill ' + strukt.key + '"' + pillAttr + '>' + strukt.label + (u.duplex ? ' · Duplex' : '') + '</span>' +
+    '<span class="pill" style="margin-left:8px;background:' + ST.color + '22;color:' + ST.color + '">' + ST.label + '</span>' +
     '<h1 style="margin-top:14px">' + naslov + '</h1>' +
     '<div class="sub">' + objekat + ' · ' + u.etazaNaziv + ' · ' + M.a2(u.zatvoreno) + ' m² zatvorenog prostora' +
     (u.terasa ? ' · terasa ' + M.a2(u.terasa) + ' m²' : '') + '</div>' +
@@ -165,7 +181,7 @@
       row('Ukupna neto površina', M.a2(u.ukupno) + ' m²') +
       (u.redukovano ? row('Redukovana (−3%)', M.a2(u.redukovano) + ' m²') : '') +
       row('Grejanje', 'Centralno gradsko') +
-      row('Status', 'U ponudi') +
+      row('Status', '<span style="color:' + ST.color + ';font-weight:600">' + ST.label + '</span>') +
       row('Cena po m²', M.eur(u.cenaM2) + ' € <span style="color:var(--muted-2);font-weight:400">sa PDV-om</span>') +
       row('Cena stana', '<span style="color:var(--accent);font-weight:600">' + M.eur(u.cena) + ' €</span>') +
     '</div>' +
@@ -193,6 +209,7 @@
     others = M.dz.units.filter(function (x) { return x.id !== u.id; })
       .map(function (x) {
         return { id: x.id, num: x.num, ukupno: x.ukupno, terasa: x.terasa, beds: x.beds,
+                 cena: x.cena, status: x.status,
                  strukt: { key: 'dz', label: x.struktura, color: x.color }, dz: true };
       });
     relEyebrow = 'Objekat ' + objekat;
@@ -207,17 +224,21 @@
       '<h2 style="font-size:30px">' + relTitle + '</h2><div class="rel-grid">';
     others.forEach(function (x) {
       var pa = x.dz ? ' style="background:' + x.strukt.color + '22;color:' + x.strukt.color + '"' : '';
-      html += '<a class="card" href="stan.html?id=' + x.id + '">' +
+      var sx = M.STATUS[x.status];
+      /* prodat stan ostaje u listi radi preglednosti, ali nije link */
+      html += (sx.dostupan ? '<a class="card" href="' + stanURL(x.id) + '">' : '<div class="card sold">') +
         '<div class="uc-top"><b style="font-size:16px">Stan ' + (x.dz ? '' : 'br. ') + x.num + '</b>' +
         '<span class="pill ' + x.strukt.key + '"' + pa + '>' + x.strukt.label + '</span></div>' +
         '<div class="uc-meta" style="margin-top:8px">' +
         '<span>' + M.a2(x.ukupno) + ' m²</span>' +
         '<span>' + x.beds + (x.beds === 1 ? ' spavaća' : ' spavaće') + '</span>' +
         (x.terasa ? '<span>terasa ' + M.a2(x.terasa) + ' m²</span>' : '') +
+        (x.status !== 'slobodan'
+          ? '<span style="color:' + sx.color + ';font-weight:600">' + sx.label + '</span>' : '') +
         '</div>' +
         '<div class="uc-price">' + M.eur(x.cena) + ' €' +
         (x.duplex ? '<small>duplex — dva nivoa</small>' : '') + '</div>' +
-        '</a>';
+        (sx.dostupan ? '</a>' : '</div>');
     });
     html += '</div></section>';
   }

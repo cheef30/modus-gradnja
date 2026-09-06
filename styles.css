@@ -287,6 +287,10 @@ section{position:relative}
 .unit-card:hover{border-color:var(--accent);background:rgba(200,168,107,.06);transform:translateX(3px)}
 .unit-card.sold{opacity:.5;cursor:default}
 .unit-card.sold:hover{border-color:var(--line);background:transparent;transform:none}
+/* prodat stan u mini-osnovi i u listi srodnih — vidljiv, ali ne poziva na klik */
+.mini-plan .u.sold{cursor:default}
+.card.sold{opacity:.55;cursor:default}
+.card.sold:hover{border-color:var(--line);background:var(--panel);transform:none}
 .uc-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:7px}
 .uc-top b{font-size:14.5px;font-weight:600}
 .pill{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:999px;font-weight:600}

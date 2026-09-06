@@ -73,14 +73,16 @@ Poštuje se `prefers-reduced-motion`.
 
 ```
 ├── index.html          početna + 3D konfigurator
-├── stan.html           stranica stana (dinamička, ?id=C01…C63, S1…S18)
+├── stan.html           šablon stranice stana
+├── stan/               GENERISANO — 70 statičkih stranica (C01.html …)
+├── build-stanovi.js    generator stranica + sitemap-a
 ├── styles.css          stilovi (dizajn tokeni kroz CSS varijable)
-├── data.js             GENERISAN iz stanovi.json + API sloj
+├── data.js             podaci + API sloj (cene, statusi, raspored)
 ├── site.js             zajedničko: nav, scroll reveal, forme, kontakt
 ├── app.js              3D scena, kontrole, raycasting, panel etaža
 ├── stan.js             render stranice stana
 ├── stanovi.json        IZVOR podataka o stanovima
-├── sitemap.xml         sve stranice stanova
+├── sitemap.xml         GENERISAN
 └── img/
     ├── stanovi/        originalni prodajni listovi (85 MB, van gita)
     ├── stanovi-web/    web verzije istih listova (8 MB)
@@ -91,7 +93,34 @@ Poštuje se `prefers-reduced-motion`.
 
 ## Izmena podataka
 
-Izvor istine je **`stanovi.json`** — ne menjati `data.js` ručno, on se generiše.
+### Status stana
+
+U `data.js`, objekat `STATUSI` — podrazumevano su **svi slobodni**, upisuju se
+samo izuzeci:
+
+```js
+var STATUSI = { 'C05': 'rezervisan', 'C12': 'prodat', 'M13': 'prodat' };
+```
+
+Prodati stanovi se prigušuju u listi, mini-osnovi i 3D prikazu, i ne otvaraju se.
+
+### Cene
+
+U `data.js`: `CENA_M2` (Kneza Sime Markovića) i `CENA_M2_DZ` (Miloša Obrenovića).
+Obračun ide po ukupnoj neto površini, sa PDV-om.
+
+### Posle svake izmene cena ili statusa
+
+```bash
+node build-stanovi.js
+```
+
+Regeneriše svih 70 stranica u `stan/` i `sitemap.xml`. **Obavezno** — inače
+statičke stranice zadrže stare cene i statuse u meta oznakama.
+
+### Podaci o stanovima
+
+Izvor je **`stanovi.json`**.
 
 - `tipovi` — jedinstveni rasporedi stanova (prostorije i površine)
 - `jedinice` — mapiranje svakog stana na svoj tip, etažu i prodajni list
