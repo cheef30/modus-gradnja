@@ -1,4 +1,4 @@
-# MODUS GRADNJA — prezentacioni sajt sa 3D konfiguratorom stanova
+# MODUS GRADNJA - prezentacioni sajt sa 3D konfiguratorom stanova
 
 Sajt građevinske firme MODUS GRADNJA: interaktivni 3D prikaz objekta,
 izbor sprata i stana, prodajni listovi i cene.
@@ -23,12 +23,12 @@ preuzeti su iz projektne dokumentacije investitora.
 
 **3D konfigurator**
 
-- Proceduralno generisan model objekta (Three.js) — bez eksternih 3D fajlova
+- Proceduralno generisan model objekta (Three.js) - bez eksternih 3D fajlova
 - Rotacija mišem, zumiranje točkićem, pinch-zoom na dodirnim ekranima
 - Izbor etaže: izabrana se izdiže i osvetljava, ostale se prigušuju
 - Raycasting selekcija stanova sa tooltipom (struktura, kvadratura, cena)
 - Filter po strukturi (dvosobni / trosobni / četvorosobni)
-- 2D osnova etaže sinhronizovana sa 3D prikazom — hover i klik rade u oba smera
+- 2D osnova etaže sinhronizovana sa 3D prikazom - hover i klik rade u oba smera
 - Širine stanova u modelu proporcionalne stvarnoj kvadraturi
 
 **Prodajni deo**
@@ -49,7 +49,7 @@ preuzeti su iz projektne dokumentacije investitora.
 
 ## Performanse
 
-3D scena se renderuje **samo kada se nešto menja** — u mirovanju GPU ne radi
+3D scena se renderuje **samo kada se nešto menja** - u mirovanju GPU ne radi
 ništa. Petlja se potpuno pauzira kada sekcija nije u vidnom polju ili je tab
 u pozadini. `devicePixelRatio` je ograničen, senke 1024², ~130 draw call-ova.
 
@@ -62,7 +62,7 @@ Poštuje se `prefers-reduced-motion`.
 | | |
 |---|---|
 | 3D | Three.js r128 (WebGL) |
-| Kontrola kamere | sopstvena — sferne koordinate sa damping-om, bez OrbitControls |
+| Kontrola kamere | sopstvena - sferne koordinate sa damping-om, bez OrbitControls |
 | Frontend | Vanilla JS (ES5), HTML5, CSS3 |
 | Zavisnosti | nema build procesa, nema npm-a |
 | Hosting | GitHub Pages |
@@ -74,7 +74,7 @@ Poštuje se `prefers-reduced-motion`.
 ```
 ├── index.html          početna + 3D konfigurator
 ├── stan.html           šablon stranice stana
-├── stan/               GENERISANO — 70 statičkih stranica (C01.html …)
+├── stan/               GENERISANO - 70 statičkih stranica (C01.html …)
 ├── build-stanovi.js    generator stranica + sitemap-a
 ├── styles.css          stilovi (dizajn tokeni kroz CSS varijable)
 ├── data.js             podaci + API sloj (cene, statusi, raspored)
@@ -95,7 +95,7 @@ Poštuje se `prefers-reduced-motion`.
 
 ### Status stana
 
-U `data.js`, objekat `STATUSI` — podrazumevano su **svi slobodni**, upisuju se
+U `data.js`, objekat `STATUSI` - podrazumevano su **svi slobodni**, upisuju se
 samo izuzeci:
 
 ```js
@@ -115,19 +115,19 @@ Obračun ide po ukupnoj neto površini, sa PDV-om.
 node build-stanovi.js
 ```
 
-Regeneriše svih 70 stranica u `stan/` i `sitemap.xml`. **Obavezno** — inače
+Regeneriše svih 70 stranica u `stan/` i `sitemap.xml`. **Obavezno** - inače
 statičke stranice zadrže stare cene i statuse u meta oznakama.
 
 ### Podaci o stanovima
 
 Izvor je **`stanovi.json`**.
 
-- `tipovi` — jedinstveni rasporedi stanova (prostorije i površine)
-- `jedinice` — mapiranje svakog stana na svoj tip, etažu i prodajni list
-- `objekat` — spratnost i zbirne površine
+- `tipovi` - jedinstveni rasporedi stanova (prostorije i površine)
+- `jedinice` - mapiranje svakog stana na svoj tip, etažu i prodajni list
+- `objekat` - spratnost i zbirne površine
 
 Raspored duž lamele (ko je gde) i geometrija modela su u API sloju `data.js`
-(`ORDER`, `MODUS.geo`) — 2D osnova i 3D model čitaju iste vrednosti, pa ne mogu
+(`ORDER`, `MODUS.geo`) - 2D osnova i 3D model čitaju iste vrednosti, pa ne mogu
 da se raziđu.
 
 Kontakt podaci su na jednom mestu: `MODUS.kontakt` u `data.js`.
@@ -141,7 +141,7 @@ python3 -m http.server 8000
 # → http://localhost:8000
 ```
 
-Lokalni server je potreban — kontakt forme ne rade kada se `index.html`
+Lokalni server je potreban - kontakt forme ne rade kada se `index.html`
 otvori kao fajl (`file://`).
 
 ---

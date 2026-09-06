@@ -1,5 +1,5 @@
 /* ==========================================================================
-   MODUS GRADNJA — stilovi
+   MODUS GRADNJA - stilovi
    ========================================================================== */
 :root{
   --bg:#08090b;
@@ -37,7 +37,7 @@ html{scroll-behavior:smooth}
 .field textarea:focus-visible,
 .field select:focus-visible{outline-offset:1px}
 .btn:focus-visible,.nav-cta:focus-visible,.vt-btn:focus-visible{outline-offset:4px}
-/* mete skip-linka — fokus se pomera, ali bez okvira oko cele sekcije */
+/* mete skip-linka - fokus se pomera, ali bez okvira oko cele sekcije */
 [tabindex="-1"]:focus,[tabindex="-1"]:focus-visible{outline:none}
 
 /* sadrzaj samo za citace ekrana */
@@ -46,7 +46,7 @@ html{scroll-behavior:smooth}
   overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;
 }
 
-/* preskoci na sadrzaj — vidljiv tek kad dobije fokus */
+/* preskoci na sadrzaj - vidljiv tek kad dobije fokus */
 .skip-link{
   position:absolute;left:16px;top:-100px;z-index:200;
   background:var(--accent);color:#12100b;font-size:14px;font-weight:600;
@@ -287,7 +287,7 @@ section{position:relative}
 .unit-card:hover{border-color:var(--accent);background:rgba(200,168,107,.06);transform:translateX(3px)}
 .unit-card.sold{opacity:.5;cursor:default}
 .unit-card.sold:hover{border-color:var(--line);background:transparent;transform:none}
-/* prodat stan u mini-osnovi i u listi srodnih — vidljiv, ali ne poziva na klik */
+/* prodat stan u mini-osnovi i u listi srodnih - vidljiv, ali ne poziva na klik */
 .mini-plan .u.sold{cursor:default}
 .card.sold{opacity:.55;cursor:default}
 .card.sold:hover{border-color:var(--line);background:var(--panel);transform:none}
@@ -484,7 +484,7 @@ footer{border-top:1px solid var(--line);padding:56px 0 34px;background:#07080a}
 .privacy-note a:hover{color:var(--accent)}
 
 /* ---------- mamac za automate (honeypot) ----------
-   Van ekrana umesto display:none — deo automata preskace sakrivena
+   Van ekrana umesto display:none - deo automata preskace sakrivena
    polja, ali skoro nijedan ne proverava poziciju.                     */
 .hp{
   position:absolute!important;left:-9999px!important;top:auto!important;

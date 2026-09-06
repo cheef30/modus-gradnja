@@ -1,9 +1,9 @@
 ﻿/* ==========================================================================
-   MODUS GRADNJA — 3D konfigurator stanova (realni objekat Pr+1+2+Pk, 63 stana)
-   Three.js r128 — sopstvena kontrola kamere, bez OrbitControls.
+   MODUS GRADNJA - 3D konfigurator stanova (realni objekat Pr+1+2+Pk, 63 stana)
+   Three.js r128 - sopstvena kontrola kamere, bez OrbitControls.
 
    Performanse:
-   - render SAMO kad se nesto menja (kamera, hover, animacija) — u mirovanju
+   - render SAMO kad se nesto menja (kamera, hover, animacija) - u mirovanju
      GPU ne radi nista
    - petlja se potpuno pauzira kad 3D sekcija nije na ekranu ili je tab skriven
    - pixelRatio ogranicen, senke 1024, ~130 draw call-ova ukupno
@@ -15,7 +15,7 @@
   if (!M) return;
 
   /* ------------------------------------------------------ dimenzije -----
-     Iz data.js (MODUS.geo) — jedno mesto za sve, da 2D osnova i 3D model
+     Iz data.js (MODUS.geo) - jedno mesto za sve, da 2D osnova i 3D model
      ne mogu da odu svaka na svoju stranu. */
   var G = M.geo;
   var L = G.LEN;             // duzina lamele (m)
@@ -84,7 +84,7 @@
     if (!stage || !canvas) return;
 
     /* scena se moze inicijalizovati dok je prikaz kartica aktivan (stage
-       tada nema dimenzije) — uzmi razumne podrazumevane, ResizeObserver
+       tada nema dimenzije) - uzmi razumne podrazumevane, ResizeObserver
        ispravlja cim stage postane vidljiv */
     var w0 = stage.clientWidth || 960, h0 = stage.clientHeight || 640;
 
@@ -282,10 +282,10 @@
       var fw = f.fw;
       var fd = f.fd;
       var dN = f.depthN;      // dubina severnog niza (racunata iz povrsina)
-      var dS = f.depthS;      // dubina juznog niza — nije ista kao severna
+      var dS = f.depthS;      // dubina juznog niza - nije ista kao severna
       var unitH = FH - 0.55;
 
-      /* medjuspratna ploca — uvek pun gabarit (na PK pravi krovnu terasu) */
+      /* medjuspratna ploca - uvek pun gabarit (na PK pravi krovnu terasu) */
       var slab = new THREE.Mesh(
         new THREE.BoxGeometry(L + 0.8, 0.28, DEP + 0.8),
         mkMat({ color: COL.slab, roughness: 0.75, metalness: 0.05 })
@@ -294,11 +294,11 @@
       slab.castShadow = true; slab.receiveShadow = true;
       add(rec, slab);
 
-      /* stanovi — pozicije ocitane iz osnova (jug / sever / pun gabarit) */
+      /* stanovi - pozicije ocitane iz osnova (jug / sever / pun gabarit) */
       f.units.forEach(function (u) {
         var w = u.lw * fw - GAP;
         var x = -fw / 2 + (u.lx + u.lw / 2) * fw;
-        /* svaki niz ima svoju dubinu i lezi uz svoju fasadu — hodnik
+        /* svaki niz ima svoju dubinu i lezi uz svoju fasadu - hodnik
            izmedju njih zato nije na sredini gabarita */
         var north = (u.side === 'N');
         var d = (north ? dN : dS) - 0.1;
@@ -310,7 +310,7 @@
         mesh.userData = { unitId: u.id, floorKey: f.key, pick: true };
         add(rec, mesh);
         rec.units[u.id] = mesh;
-        rec.pick.push(mesh);      /* gotova lista za raycast — bez filter() po hover-u */
+        rec.pick.push(mesh);      /* gotova lista za raycast - bez filter() po hover-u */
       });
 
       /* garaze na istocnom kraju juzne strane prizemlja (mesta 49-53) */
@@ -472,7 +472,7 @@
     btnCards.onclick = function () { showView('cards'); };
   }
 
-  /* ============================ KARTICE — objekat Milosa Obrenovica ----- */
+  /* ============================ KARTICE - objekat Milosa Obrenovica ----- */
   function renderApartmentCards() {
     var host = document.getElementById('aptCards');
     if (!host) return;
@@ -480,7 +480,7 @@
     M.dz.units.forEach(function (u) {
       html += '<div class="apt-card">' +
         '<a class="ac-img ac-photo" href="' + stanURL(u.id) + '">' +
-        '<img src="img/druga-zgrada/' + encodeURIComponent(u.list) + '" alt="Stan ' + u.num + ' — ' + u.struktura + '" loading="lazy">' +
+        '<img src="img/druga-zgrada/' + encodeURIComponent(u.list) + '" alt="Stan ' + u.num + ', ' + u.struktura + '" loading="lazy">' +
         '<span class="ac-tag pill" style="background:' + u.color + '22;color:' + u.color + '">' + u.struktura + '</span>' +
         (u.status !== 'slobodan'
           ? '<span class="ac-tag pill" style="margin-left:6px;background:' + M.STATUS[u.status].color +
@@ -664,12 +664,12 @@
 
   function openUnit(id) {
     var u = M.getUnit(id);
-    /* prodat stan nema svoju ponudu — ne vodi nikuda */
+    /* prodat stan nema svoju ponudu - ne vodi nikuda */
     if (u && !M.STATUS[u.status].dostupan) return;
     window.location.href = stanURL(id);
   }
 
-  /* staticka stranica po stanu — vidi build-stanovi.js */
+  /* staticka stranica po stanu - vidi build-stanovi.js */
   function stanURL(id) { return 'stan/' + id + '.html'; }
 
   /* ----------------------------------------------------------- tooltip */
@@ -705,7 +705,7 @@
 
     M.floors.forEach(function (f) {
       var rec = floorObjects[f.key];
-      if (!rec) return;                 /* 3D jos nije ucitan — samo DOM deo */
+      if (!rec) return;                 /* 3D jos nije ucitan - samo DOM deo */
       var selected = (S.floor === f.key);
       var dimmed = (S.floor !== null && !selected);
       var hovered = (S.floor === null && S.hoverFloor === f.key);
@@ -740,7 +740,7 @@
         var mat = mesh.material;
         var isHover = (S.hoverUnit === u.id);
         var dostupan = M.STATUS[u.status].dostupan;
-        /* prodat stan se ne boji po strukturi — nije vise u ponudi */
+        /* prodat stan se ne boji po strukturi - nije vise u ponudi */
         var matchesFilter = dostupan &&
           (S.filter === 'all' || u.strukt.key === S.filter);
 
@@ -845,7 +845,7 @@
     head.innerHTML =
       '<div class="t">Konfigurator stanova</div>' +
       '<h3>Novi stambeni objekat</h3>' +
-      '<p>Pr+2+Pk · ' + st.ukupno + ' stanova · ' + Math.round(st.minA) + '–' + Math.round(st.maxA) + ' m²<br>' +
+      '<p>Pr+2+Pk · ' + st.ukupno + ' stanova · ' + Math.round(st.minA) + '-' + Math.round(st.maxA) + ' m²<br>' +
       '<b style="color:var(--accent);font-weight:600">' + M.eur(M.cenaM2) + ' €/m²</b> sa PDV-om</p>';
 
     var html = chipsHTML();
@@ -857,7 +857,7 @@
         '<span class="lv">' + f.key + '</span>' +
         '<span class="fi"><b>' + f.name + '</b>' +
         '<span>' + n + ' stanova · ' + M.range(f) + '<br>' +
-        M.eur(f.minC) + '–' + M.eur(f.maxC) + ' €</span></span>' + dotsFor(f) + '</button>';
+        M.eur(f.minC) + '-' + M.eur(f.maxC) + ' €</span></span>' + dotsFor(f) + '</button>';
     });
     html += '</div>';
     panelEl.innerHTML = html;
@@ -923,13 +923,13 @@
 
   /* ------------------------------------------------------- mini osnova -- */
   function miniPlanSVG(f) {
-    /* visine nizova prate stvarne dubine iz data.js — osnova i 3D model
+    /* visine nizova prate stvarne dubine iz data.js - osnova i 3D model
        moraju da pokazuju isti raspored */
     var W = 300, corr = 12, bodyH = 92;
     var hN = bodyH * f.depthN / (f.depthN + f.depthS);
     var hS = bodyH - hN;
     var H = bodyH + corr;
-    var s = '<div class="mini-plan"><div class="mt">Šematska osnova etaže — raspored duž lamele</div>';
+    var s = '<div class="mini-plan"><div class="mt">Šematska osnova etaže, raspored duž lamele</div>';
     s += '<svg viewBox="-4 -4 ' + (W + 8) + ' ' + (H + 22) + '" id="miniPlan">';
     s += '<rect x="-2" y="-2" width="' + (W + 4) + '" height="' + (H + 4) + '" rx="4" fill="none" stroke="rgba(255,255,255,.14)" stroke-dasharray="4 4"/>';
     f.units.forEach(function (u) {

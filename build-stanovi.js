@@ -3,12 +3,12 @@
 
    ZASTO POSTOJI
    Jedna stranica `stan.html?id=...` je pokrivala svih 70 stanova, ali je sve
-   crtala iz JavaScripta — ukljucujuci <title> i og: oznake. Skeneri linkova
+   crtala iz JavaScripta - ukljucujuci <title> i og: oznake. Skeneri linkova
    (Viber, WhatsApp, Facebook, Slack) NE pokrecu JS, pa su svi stanovi
    dobijali istu bezlicnu karticu bez cene i kvadrature.
 
    Ovaj skript pravi po jedan HTML fajl za svaki stan, sa tacnim meta
-   oznakama upisanim u sam fajl. Telo stranice i dalje crta stan.js —
+   oznakama upisanim u sam fajl. Telo stranice i dalje crta stan.js -
    duplira se samo ono sto skeneri citaju.
 
    POKRETANJE
@@ -48,7 +48,7 @@ function opis(u, isDZ) {
   var objekat = isDZ ? M.dz.naziv : 'Kneza Sime Markovića';
   var strukt = isDZ ? u.struktura : u.strukt.label;
   var st = M.STATUS[u.status];
-  return 'Stan ' + (isDZ ? '' : 'br. ') + u.num + ' — ' + strukt.toLowerCase() +
+  return 'Stan ' + (isDZ ? '' : 'br. ') + u.num + ', ' + strukt.toLowerCase() +
     ', ' + M.a2(u.ukupno) + ' m², ' + u.etazaNaziv.toLowerCase() +
     ' · ' + M.eur(u.cena) + ' € (' + M.eur(u.cenaM2) + ' €/m² sa PDV-om)' +
     ' · ' + st.label + ' · objekat ' + objekat + '.';
@@ -56,7 +56,7 @@ function opis(u, isDZ) {
 
 /* --------------------------------------------------- strukturirani podaci
    Google tako zna da je ovo nekretnina sa cenom i povrsinom, a ne obican
-   tekst — stranica postaje podobna za bogatije rezultate pretrage.      */
+   tekst - stranica postaje podobna za bogatije rezultate pretrage.      */
 function jsonLd(u, isDZ, url) {
   var strukt = isDZ ? u.struktura : u.strukt.label;
   var slika = isDZ
@@ -111,7 +111,7 @@ function build() {
   svi.forEach(function (rec) {
     var u = rec.u, isDZ = rec.dz;
     var naslov = 'Stan ' + (isDZ ? '' : 'br. ') + u.num + ' · ' +
-      u.etazaNaziv + ' — MODUS GRADNJA';
+      u.etazaNaziv + ' - MODUS GRADNJA';
     var d = opis(u, isDZ);
     var url = BASE + 'stan/' + u.id + '.html';
 

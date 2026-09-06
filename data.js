@@ -149,8 +149,8 @@ window.MODUS_DATA = {
 };
 
 /* ==========================================================================
-   MODUS GRADNJA — izvedeni API nad podacima iz projektne dokumentacije
-   (generisano iz stanovi.json — ne menjati rucno, menja se stanovi.json)
+   MODUS GRADNJA - izvedeni API nad podacima iz projektne dokumentacije
+   (generisano iz stanovi.json - ne menjati rucno, menja se stanovi.json)
    ========================================================================== */
 (function () {
   'use strict';
@@ -168,7 +168,7 @@ window.MODUS_DATA = {
 
   /* ------------------------------------------------------------ cene ----
      Cene su SA PDV-om, po objektu. Obracunska povrsina je UKUPNA NETO
-     (zatvoreno + terasa), onako kako stoji na prodajnim listovima —
+     (zatvoreno + terasa), onako kako stoji na prodajnim listovima -
      terase se naplacuju punom kvadraturom, bez redukcije.
 
      Za promenu cene menja se samo vrednost ovde.                       */
@@ -240,7 +240,7 @@ window.MODUS_DATA = {
   /* ------------------------------- raspored duz lamele (0..1 po duzini) --
      Redosled OCITAN sa semа pozicije na prodajnim listovima (donji levi
      ugao svakog lista pokazuje etazu sa istaknutim stanom). To je izvor
-     istine — ne prepisivati rucno.
+     istine - ne prepisivati rucno.
 
      Dva niza duz lamele, oba idu od zapadnog do istocnog kraja:
        N = severni (gornji) niz
@@ -248,7 +248,7 @@ window.MODUS_DATA = {
      CORE = ulaz/stepeniste/lift;  GAR = garaze (samo PR).
 
      NAPOMENA: raniji model je stanove 04/19/35/51 tretirao kao ugaoni
-     stan preko cele dubine objekta. Listovi to demantuju — oni su prosto
+     stan preko cele dubine objekta. Listovi to demantuju - oni su prosto
      prvi stanovi SEVERNOG niza, a 03/18/34/50 prvi u JUZNOM. Zbog toga
      su 03/18/34/50 bili odgurnuti sa leve ivice.                        */
   var ORDER = {
@@ -263,12 +263,12 @@ window.MODUS_DATA = {
   };
 
   /* -------------------------------------------- geometrija gabarita -----
-     LEN i DEPTH NISU iz projektne dokumentacije — dokumentacija daje samo
+     LEN i DEPTH NISU iz projektne dokumentacije - dokumentacija daje samo
      povrsine stanova. DEPTH je izveden tako da zbir povrsina oba niza
      stane u gabarit: pri 16 m nacrtana povrsina odstupa od stvarne najvise
      ~5%, i to ravnomerno po celoj etazi.
 
-     Sve dimenzije stoje OVDE i izvoze se kao MODUS.geo — app.js ih cita
+     Sve dimenzije stoje OVDE i izvoze se kao MODUS.geo - app.js ih cita
      umesto da drzi svoje kopije. Ranije su bile na dva mesta (data.js je
      racunao sirinu ugaonog stana za dubinu 13 m, app.js ga crtao na
      14.9 m) pa je taj stan ispadao 11% prevelik.                        */
@@ -282,7 +282,7 @@ window.MODUS_DATA = {
   };
   /* NAPOMENA o potkrovlju: po prodajnim listovima PK stanovi imaju ISTU
      zatvorenu povrsinu kao drugi sprat (T49 = T17 = 53.65 m2), a vece
-     terase. To znaci da se zatvoreni gabarit PK-a prakticno ne uvlaci —
+     terase. To znaci da se zatvoreni gabarit PK-a prakticno ne uvlaci -
      zato je PK_INSET samo 0.20 m, tek toliko da se potkrovlje procita.
      Ako objekat stvarno ima povuceno potkrovlje, onda zatvorene povrsine
      na listovima 48-63 treba proveriti sa investitorom. */
@@ -332,7 +332,7 @@ window.MODUS_DATA = {
        Nizovi NEMAJU istu dubinu. Juzni gubi duzinu na ulazni blok i
        garaze, pa bi pri deobi 50:50 njegovi stanovi ispali ~14% premali.
        Zato se dubina svakog niza izvodi iz njegove povrsine i raspolozive
-       duzine, a onda se oba skaliraju da tacno popune gabarit — greska
+       duzine, a onda se oba skaliraju da tacno popune gabarit - greska
        koja ostane je ista za sve stanove na etazi.                      */
     function rowDepth(side) {
       var r = us.filter(function (u) { return u.side === side; });
@@ -403,7 +403,7 @@ window.MODUS_DATA = {
 
   /* ---------------------------------------------------------- kontakt ---
      Jedinstven izvor za sve sto JS generise (stan.html, poruke formi).
-     Vidljivi kontakt u index.html je namerno staticki HTML — mora da
+     Vidljivi kontakt u index.html je namerno staticki HTML - mora da
      postoji i bez JS-a i da ga pretrazivaci procitaju. Ako se broj menja,
      menja se OVDE i u sekciji #kontakt + futeru u index.html.           */
   var KONTAKT = {
@@ -413,7 +413,7 @@ window.MODUS_DATA = {
     tel2Href: 'tel:+381646577756',
     mail: 'office.modusgradnja@gmail.com',
     instagram: 'https://www.instagram.com/modus_gradnja/',
-    radnoVreme: '8–16h radnim danima'
+    radnoVreme: '8-16h radnim danima'
   };
 
   window.MODUS = {
@@ -437,7 +437,7 @@ window.MODUS_DATA = {
       return null;
     },
     a2: a2,
-    range: function (f) { return Math.round(f.minA) + '–' + Math.round(f.maxA) + ' m²'; },
+    range: function (f) { return Math.round(f.minA) + '-' + Math.round(f.maxA) + ' m²'; },
     stats: function () {
       var all = units.map(function (u) { return u.ukupno; });
       return {

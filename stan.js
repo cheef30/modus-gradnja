@@ -1,13 +1,13 @@
 /* ==========================================================================
-   MODUS GRADNJA — dinamicka stranica stana (stan.html?id=C01 ... C63)
-   Podaci dolaze iz data.js (projektna dokumentacija) — jedna stranica
+   MODUS GRADNJA - dinamicka stranica stana (stan.html?id=C01 ... C63)
+   Podaci dolaze iz data.js (projektna dokumentacija) - jedna stranica
    opsluzuje sva 63 stana.
    ========================================================================== */
 (function () {
   'use strict';
   var M = window.MODUS;
 
-  /* kontakt dolazi iz data.js — jedno mesto za izmenu */
+  /* kontakt dolazi iz data.js - jedno mesto za izmenu */
   var K = M.kontakt;
   var TEL_1 = K.tel1;
   var TEL_1_HREF = K.tel1Href;
@@ -22,7 +22,7 @@
 
   var app = document.getElementById('app');
   /* Staticke stranice (stan/C01.html) upisuju id u MODUS_STAN_ID.
-     Stari oblik stan.html?id=C01 i dalje radi — postoje podeljeni linkovi. */
+     Stari oblik stan.html?id=C01 i dalje radi - postoje podeljeni linkovi. */
   var staticPage = !!window.MODUS_STAN_ID;
   var id = window.MODUS_STAN_ID || q('id');
   var u = id ? M.getUnit(id) : null;
@@ -55,17 +55,17 @@
     });
   }
 
-  document.title = 'Stan ' + (isDZ ? '' : 'br. ') + u.num + ' · ' + u.etazaNaziv + ' — MODUS GRADNJA';
+  document.title = 'Stan ' + (isDZ ? '' : 'br. ') + u.num + ' · ' + u.etazaNaziv + ' - MODUS GRADNJA';
 
   /* ---------------------------------------------- meta podaci po stanu --
      Na statickim stranicama (stan/C01.html) meta oznake vec stoje u samom
-     fajlu — tako ih vide skeneri linkova koji ne pokrecu JS. Ovde se
+     fajlu - tako ih vide skeneri linkova koji ne pokrecu JS. Ovde se
      dopunjuju samo za stari oblik stan.html?id=..., da i on nesto kaze. */
   if (!staticPage) {
     (function () {
       var BASE = 'https://cheef30.github.io/modus-gradnja/';
       var objekatMeta = isDZ ? M.dz.naziv : 'Kneza Sime Markovića';
-      var opis = 'Stan ' + (isDZ ? '' : 'br. ') + u.num + ' — ' +
+      var opis = 'Stan ' + (isDZ ? '' : 'br. ') + u.num + ', ' +
         (isDZ ? u.struktura : u.strukt.label).toLowerCase() +
         ', ' + M.a2(u.ukupno) + ' m², ' + u.etazaNaziv.toLowerCase() +
         ' · objekat ' + objekatMeta + '. Tlocrt, površine po prostorijama i prodajni list.';
@@ -82,7 +82,7 @@
       meta('meta[name="twitter:title"]', document.title);
       meta('meta[name="twitter:description"]', opis);
 
-      /* canonical uvek pokazuje na staticku stranicu — jedna adresa po stanu */
+      /* canonical uvek pokazuje na staticku stranicu - jedna adresa po stanu */
       var canon = document.querySelector('link[rel="canonical"]');
       if (canon) canon.setAttribute('href', url);
     })();
@@ -95,7 +95,7 @@
       : ROOT + 'img/stanovi-web/' + unit.list;
     return '<a class="sheet-box" href="' + src + '" target="_blank" rel="noopener" ' +
       'title="Otvori prodajni list u punoj veličini">' +
-      '<img src="' + src + '" alt="Stan br. ' + unit.num + ' — prodajni list sa tlocrtom" loading="lazy">' +
+      '<img src="' + src + '" alt="Stan br. ' + unit.num + ', prodajni list sa tlocrtom" loading="lazy">' +
       '</a>';
   }
 
@@ -149,7 +149,7 @@
 
   html += '<div class="sp-grid">';
 
-  /* leva kolona — prodajni list stana */
+  /* leva kolona - prodajni list stana */
   html += '<div>' +
     '<p class="eyebrow">Prikaz i tlocrt stana</p>' +
     sheetHTML(u) +
@@ -157,7 +157,7 @@
       '<span>Zatvoreno ' + M.a2(u.zatvoreno) + ' m²</span>' +
       (u.terasa ? '<span>Terasa ' + M.a2(u.terasa) + ' m²</span>' : '') +
       '<span>Ukupno ' + M.a2(u.ukupno) + ' m²</span>' +
-      (u.redukovano ? '<span>Redukovano (−3%) ' + M.a2(u.redukovano) + ' m²</span>' : '') +
+      (u.redukovano ? '<span>Redukovano (-3%) ' + M.a2(u.redukovano) + ' m²</span>' : '') +
     '</div>' +
     (u.duplex
       ? '<p style="font-size:13.5px;color:var(--muted);margin-top:18px">' +
@@ -167,19 +167,19 @@
       'Klikni na sliku za prodajni list u punoj veličini.</p>' +
     '</div>';
 
-  /* desna kolona — specifikacija + kontakt */
+  /* desna kolona - specifikacija + kontakt */
   html += '<div><div class="sticky">' +
     '<p class="eyebrow">Specifikacija</p>' +
     '<div class="spec">' +
       row('Objekat', objekat) +
       row('Oznaka stana', isDZ ? ('S' + u.num) : u.id) +
-      row('Struktura', strukt.label + (u.duplex ? ' — duplex' : '')) +
+      row('Struktura', strukt.label + (u.duplex ? ', duplex' : '')) +
       row('Sprat', u.etazaNaziv) +
       row('Spavaće sobe', u.beds) +
       row('Zatvoreni prostor', M.a2(u.zatvoreno) + ' m²') +
       (u.terasa ? row('Terasa', M.a2(u.terasa) + ' m²') : '') +
       row('Ukupna neto površina', M.a2(u.ukupno) + ' m²') +
-      (u.redukovano ? row('Redukovana (−3%)', M.a2(u.redukovano) + ' m²') : '') +
+      (u.redukovano ? row('Redukovana (-3%)', M.a2(u.redukovano) + ' m²') : '') +
       row('Grejanje', 'Centralno gradsko') +
       row('Status', '<span style="color:' + ST.color + ';font-weight:600">' + ST.label + '</span>') +
       row('Cena po m²', M.eur(u.cenaM2) + ' € <span style="color:var(--muted-2);font-weight:400">sa PDV-om</span>') +
@@ -191,7 +191,7 @@
     '</div>' +
     '<div class="mini-bldg"><div class="mt">Pozicija u objektu</div>' + buildingSVG(u.etaza) + '</div>' +
     '<div class="mini-bldg">' +
-      '<div class="mt">Kontakt — prodaja</div>' +
+      '<div class="mt">Kontakt prodaje</div>' +
       '<div class="contact-mini">' +
         '<a href="' + TEL_1_HREF + '">' + TEL_1 + '</a>' +
         '<a href="' + TEL_2_HREF + '">' + TEL_2 + '</a>' +
@@ -217,7 +217,7 @@
   } else {
     others = M.getFloor(u.etaza).units.filter(function (x) { return x.id !== u.id; });
     relEyebrow = 'Na istoj etaži';
-    relTitle = 'Ostali stanovi — ' + u.etazaNaziv.toLowerCase();
+    relTitle = 'Ostali stanovi: ' + u.etazaNaziv.toLowerCase();
   }
   if (others.length) {
     html += '<section class="related"><p class="eyebrow">' + relEyebrow + '</p>' +
@@ -237,7 +237,7 @@
           ? '<span style="color:' + sx.color + ';font-weight:600">' + sx.label + '</span>' : '') +
         '</div>' +
         '<div class="uc-price">' + M.eur(x.cena) + ' €' +
-        (x.duplex ? '<small>duplex — dva nivoa</small>' : '') + '</div>' +
+        (x.duplex ? '<small>duplex, dva nivoa</small>' : '') + '</div>' +
         (sx.dostupan ? '</a>' : '</div>');
     });
     html += '</div></section>';
@@ -246,8 +246,8 @@
   /* ------------------------------------------------ kontakt forma ------- */
   html += '<section class="related" id="upit">' +
     '<p class="eyebrow">Kontakt</p>' +
-    '<h2 style="font-size:30px">Zakažite obilazak — ' + naslov.toLowerCase() + '.</h2>' +
-    '<p class="lead" style="margin-top:14px">Ostavite podatke i javljamo se istog radnog dana — ' +
+    '<h2 style="font-size:30px">Zakažite obilazak: ' + naslov.toLowerCase() + '.</h2>' +
+    '<p class="lead" style="margin-top:14px">Ostavite podatke i javljamo se istog radnog dana, ' +
     'ili nas pozovite direktno na <a href="' + TEL_1_HREF + '" style="color:var(--accent)">' + TEL_1 + '</a>.</p>' +
     '<form class="form" id="unitForm" novalidate style="margin-top:30px;max-width:760px">' +
       '<div class="field"><label for="uIme">Ime i prezime</label>' +
@@ -272,12 +272,12 @@
     return '<div class="r"><span>' + k + '</span><b>' + v + '</b></div>';
   }
 
-  /* slanje upita — mamac, vremenska zamka i slanje su u site.js */
+  /* slanje upita - mamac, vremenska zamka i slanje su u site.js */
   var uf = document.getElementById('unitForm');
   var UI = window.MODUS_UI;
   if (uf && UI) {
     var guard = UI.protect(uf);
-    var POTVRDA = 'Hvala! Upit je poslat — javljamo se u najkraćem roku.';
+    var POTVRDA = 'Hvala! Upit je poslat. Javljamo se u najkraćem roku.';
 
     uf.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -297,7 +297,7 @@
         return;
       }
 
-      /* mamac popunjen — pokazi potvrdu, ali nista ne salji */
+      /* mamac popunjen - pokazi potvrdu, ali nista ne salji */
       if (guard.isBot()) {
         UI.ok(note, POTVRDA);
         uf.reset();
@@ -310,11 +310,11 @@
       btn.textContent = 'Slanje…';
 
       UI.send({
-        _subject: 'Upit — ' + naslov + ', ' + objekat,
+        _subject: 'Upit: ' + naslov + ', ' + objekat,
         _template: 'table',
         _captcha: 'false',
         'Objekat': objekat,
-        'Stan': naslov + ' — ' + u.strukt.label + ', ' + M.a2(u.ukupno) + ' m², ' + u.etazaNaziv,
+        'Stan': naslov + ', ' + u.strukt.label + ', ' + M.a2(u.ukupno) + ' m², ' + u.etazaNaziv,
         'Cena': M.eur(u.cena) + ' € (' + M.eur(u.cenaM2) + ' €/m² sa PDV-om)',
         'Ime i prezime': ime,
         'Telefon': tel,
@@ -324,7 +324,7 @@
         uf.reset();
         btn.textContent = 'Upit poslat ✓';
       }).catch(function () {
-        UI.err(note, 'Slanje trenutno nije moguće — pozovite ' + TEL_1 + ' ili pišite na ' + MAIL + '.');
+        UI.err(note, 'Slanje trenutno nije moguće. Pozovite ' + TEL_1 + ' ili pišite na ' + MAIL + '.');
         btn.disabled = false;
         btn.textContent = 'Pošalji upit';
       });

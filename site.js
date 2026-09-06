@@ -1,5 +1,5 @@
 /* ==========================================================================
-   MODUS GRADNJA — zajednicki UI za index.html i stan.html
+   MODUS GRADNJA - zajednicki UI za index.html i stan.html
    Navigacija, mobilni meni, reveal animacije, godina u futeru i slanje
    kontakt formi sa zastitom od spama. Ucitava se posle data.js.
    ========================================================================== */
@@ -10,7 +10,7 @@
 
   /* ======================================================== NAVIGACIJA */
   var nav = document.getElementById('nav');
-  /* stan.html ima nav.solid od pocetka — tamo nema sta da se prati */
+  /* stan.html ima nav.solid od pocetka - tamo nema sta da se prati */
   if (nav && !nav.classList.contains('solid')) {
     var onScroll = function () { nav.classList.toggle('solid', window.scrollY > 40); };
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -43,7 +43,7 @@
       }, { threshold: 0.12 });
       [].forEach.call(rv, function (el) { io.observe(el); });
     } else {
-      /* stariji browser — bez animacije, ali sadrzaj mora da se vidi */
+      /* stariji browser - bez animacije, ali sadrzaj mora da se vidi */
       [].forEach.call(rv, function (el) { el.classList.add('in'); });
     }
   }
@@ -55,18 +55,18 @@
   /* ===================================================== SPAM ZASTITA
      Dva sloja, ali samo jedan sme da odbaci upit:
 
-     1. mamac (honeypot) — polje van ekrana, van tab reda, sa iskljucenim
+     1. mamac (honeypot) - polje van ekrana, van tab reda, sa iskljucenim
         autocomplete-om. Covek ga fizicki ne moze popuniti, automat koji
         popunjava sva polja popuni ga skoro uvek. Ovo JESTE osnova za
-        odbacivanje — laznog pozitivnog prakticno nema.
-     2. minimalno vreme — upit poslat par stotina milisekundi od
+        odbacivanje - laznog pozitivnog prakticno nema.
+     2. minimalno vreme - upit poslat par stotina milisekundi od
         ucitavanja je skriptovan. Ovo NE odbacuje upit, samo saceka
         ostatak minimuma pa posalje. Razlog: pravi korisnik sa autofill-om
         ume da posalje za manje od sekunde, a izgubljen upit je mnogo
         skuplji od jednog spama u sanducetu.
 
      Uhvacen mamcem dobija istu potvrdu kao pravi korisnik, da ne bi
-     pokusavao ponovo drugom taktikom — upit se prosto ne salje.        */
+     pokusavao ponovo drugom taktikom - upit se prosto ne salje.        */
   var MIN_MS = 1500;
 
   function addHoneypot(form) {
@@ -88,7 +88,7 @@
       var hp = addHoneypot(form);
       var t0 = Date.now();
       return {
-        /* mamac popunjen — automat, upit se odbacuje */
+        /* mamac popunjen - automat, upit se odbacuje */
         isBot: function () { return !!hp.value; },
         /* koliko jos treba sacekati do minimuma (0 ako je proslo) */
         hold: function () { return Math.max(0, MIN_MS - (Date.now() - t0)); }
@@ -96,7 +96,7 @@
     },
 
     /* Slanje upita preko FormSubmit-a (bez backenda). Ceka `delay` ms
-       pre slanja — vidi minimalno vreme gore. */
+       pre slanja - vidi minimalno vreme gore. */
     send: function (payload, delay) {
       return new Promise(function (res) { setTimeout(res, delay || 0); })
         .then(function () {
@@ -114,13 +114,13 @@
     ok: function (note, text) { note.textContent = text; note.style.color = '#4ade80'; },
     err: function (note, text) { note.textContent = text; note.style.color = '#e0655a'; },
 
-    /* Mejl je neobavezan — prazan prolazi. Ako je unet, mora da lici na
+    /* Mejl je neobavezan - prazan prolazi. Ako je unet, mora da lici na
        adresu, inace odgovor nema gde da stigne a korisnik to ne zna. */
     validEmail: function (v) {
       return !v || /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
     },
 
-    /* Telefon: cifre, razmaci, +, -, /, zagrade — najmanje 6 cifara. */
+    /* Telefon: cifre, razmaci, +, -, /, zagrade - najmanje 6 cifara. */
     validTel: function (v) {
       return (v.replace(/\D/g, '').length >= 6) && /^[\d\s+\-/()]+$/.test(v);
     }
@@ -130,7 +130,7 @@
   var lead = document.getElementById('leadForm');
   if (lead) {
     var guard = window.MODUS_UI.protect(lead);
-    var POTVRDA = 'Hvala! Upit je poslat — javljamo se istog radnog dana.';
+    var POTVRDA = 'Hvala! Upit je poslat. Javljamo se istog radnog dana.';
 
     lead.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -155,7 +155,7 @@
         return;
       }
 
-      /* mamac popunjen — pokazi potvrdu, ali nista ne salji */
+      /* mamac popunjen - pokazi potvrdu, ali nista ne salji */
       if (guard.isBot()) {
         window.MODUS_UI.ok(note, POTVRDA);
         lead.reset();
@@ -168,7 +168,7 @@
       btn.textContent = 'Slanje…';
 
       window.MODUS_UI.send({
-        _subject: 'Upit sa sajta — ' + (lead.interes.value || 'stanovi'),
+        _subject: 'Upit sa sajta: ' + (lead.interes.value || 'stanovi'),
         _template: 'table',
         _captcha: 'false',
         'Ime i prezime': ime,
@@ -181,7 +181,7 @@
         lead.reset();
         btn.textContent = 'Upit poslat ✓';
       }).catch(function () {
-        window.MODUS_UI.err(note, 'Slanje trenutno nije moguće — pozovite ' + K.tel1 +
+        window.MODUS_UI.err(note, 'Slanje trenutno nije moguće. Pozovite ' + K.tel1 +
           ' ili pišite na ' + K.mail + '.');
         btn.disabled = false;
         btn.textContent = 'Pošalji upit';
