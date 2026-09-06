@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="sr-Latn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stranica nije pronađena — MODUS GRADNJA</title>
+<meta name="description" content="Tražena stranica ne postoji. Vratite se na početnu ili pogledajte stanove u ponudi.">
+<meta name="robots" content="noindex,follow">
+<meta name="theme-color" content="#08090b">
+
+<!-- GitHub Pages servira ovu stranicu za SVAKU nepostojecu putanju, pa i za
+     /stan/nesto.html — zato su sve putanje apsolutne od korena sajta. -->
+<link rel="icon" href="/modus-gradnja/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/modus-gradnja/apple-touch-icon.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/modus-gradnja/styles.css">
+
+<style>
+  .e404{min-height:100vh;display:flex;align-items:center;padding:120px 0 80px}
+  .e404-in{max-width:760px}
+  .e404 .kod{
+    font-size:clamp(72px,14vw,150px);font-weight:600;line-height:1;
+    letter-spacing:-.05em;color:var(--accent);opacity:.22;margin-bottom:-10px;
+  }
+  .e404 h1{font-size:clamp(30px,5vw,52px);letter-spacing:-.03em;margin-bottom:20px}
+  .e404 .lead{margin-bottom:36px}
+  .e404-akcije{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:56px}
+  .e404-linkovi{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+    gap:14px;padding-top:34px;border-top:1px solid var(--line);
+  }
+  .e404-linkovi a{
+    border:1px solid var(--line);border-radius:12px;padding:18px 20px;
+    transition:.25s;background:var(--panel);
+  }
+  .e404-linkovi a:hover{border-color:var(--accent);background:var(--panel-2);transform:translateY(-2px)}
+  .e404-linkovi b{display:block;font-size:14.5px;font-weight:600;margin-bottom:5px}
+  .e404-linkovi span{font-size:12.5px;color:var(--muted-2)}
+</style>
+</head>
+<body>
+
+<a class="skip-link" href="#sadrzaj">Preskoči na sadržaj</a>
+
+<nav class="nav solid" id="nav">
+  <div class="nav-in">
+    <a class="logo" href="/modus-gradnja/" aria-label="MODUS GRADNJA — početna">
+      <img src="/modus-gradnja/img/logo.png" width="480" height="72" alt="MODUS GRADNJA" decoding="async">
+    </a>
+    <div class="nav-links">
+      <a href="/modus-gradnja/#o-nama">O nama</a>
+      <a href="/modus-gradnja/#stanovi">Stanovi</a>
+      <a href="/modus-gradnja/#projekti">Projekti</a>
+      <a href="/modus-gradnja/#kontakt">Kontakt</a>
+    </div>
+    <a class="nav-cta" href="/modus-gradnja/#stanovi">Pogledaj stanove</a>
+  </div>
+</nav>
+
+<main class="e404 wrap" id="sadrzaj" tabindex="-1">
+  <div class="e404-in">
+    <div class="kod">404</div>
+    <h1>Ova stranica ne postoji.</h1>
+    <p class="lead">
+      Link je možda zastareo ili pogrešno prekucan. Stanovi su i dalje tu —
+      pogledajte ponudu ili nas pozovite, pa vas uputimo direktno.
+    </p>
+
+    <div class="e404-akcije">
+      <a class="btn btn-primary" href="/modus-gradnja/#stanovi">Pogledaj stanove</a>
+      <a class="btn btn-ghost" href="tel:+381606002428">Pozovi 060/6002428</a>
+    </div>
+
+    <div class="e404-linkovi">
+      <a href="/modus-gradnja/#stanovi">
+        <b>Kneza Sime Markovića</b>
+        <span>63 stana · Pr+2+Pk</span>
+      </a>
+      <a href="/modus-gradnja/#stanovi">
+        <b>Miloša Obrenovića</b>
+        <span>7 stanova u ponudi</span>
+      </a>
+      <a href="/modus-gradnja/#projekti">
+        <b>Završeni objekti</b>
+        <span>Reference</span>
+      </a>
+      <a href="/modus-gradnja/#kontakt">
+        <b>Kontakt</b>
+        <span>8–16h radnim danima</span>
+      </a>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="f-bot" style="margin-top:0;border-top:0">
+      <span>© <span id="yr">2026</span> MODUS GRADNJA. Sva prava zadržana.</span>
+      <span><a href="mailto:office.modusgradnja@gmail.com">office.modusgradnja@gmail.com</a></span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('yr').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
