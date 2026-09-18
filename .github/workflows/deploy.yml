@@ -1,0 +1,80 @@
+# ============================================================================
+# Postavljanje sajta na hosting
+#
+# Okida se na svaki push na master. Pre slanja proverava da su staticke
+# stranice u stan/ zaista regenerisane - da se ne bi desilo da se posalju
+# stare cene i statusi u meta oznakama.
+#
+# Salje se SAMO ono sto sajt koristi. Interni fajlovi (README, pitanja,
+# generator, izvorni JSON) ostaju van servera.
+#
+# Tajne se podesavaju u: Settings > Secrets and variables > Actions
+#   SSH_PRIVATE_KEY  - privatni deploy kljuc (ceo sadrzaj deploy_key)
+# ============================================================================
+name: Postavi sajt
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:        # dugme za rucno pokretanje
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  postavi:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Preuzmi repo
+        uses: actions/checkout@v4
+
+      - name: Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Ako neko zaboravi `node build-stanovi.js` pre commit-a, stranice u
+      # stan/ nose stare podatke. Ovde se generisu ponovo i poredi - ako se
+      # razlikuju, postavljanje se zaustavlja.
+      - name: Provera da su stranice regenerisane
+        run: |
+          node build-stanovi.js
+          if ! git diff --quiet; then
+            echo "::error::Stranice u stan/ nisu usklađene sa podacima."
+            echo "Pokreni lokalno: node build-stanovi.js, pa commit-uj izmene."
+            git diff --stat
+            exit 1
+          fi
+          echo "Stranice su usklađene."
+
+      # Sklapa se folder sa tacno onim sto ide na server.
+      - name: Pripremi fajlove za slanje
+        run: |
+          mkdir -p _deploy
+          rsync -a ./ _deploy/ \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude '_deploy' \
+            --exclude '.gitignore' \
+            --exclude 'README.md' \
+            --exclude 'pitanja.md' \
+            --exclude 'build-stanovi.js' \
+            --exclude 'stanovi.json' \
+            --exclude 'img/stanovi' \
+            --exclude 'img/garazapdf.pdf'
+          echo "Fajlova za slanje: $(find _deploy -type f | wc -l)"
+          du -sh _deploy
+
+      - name: Posalji na hosting
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.6
+        with:
+          server: nino.webhostingsrbija.rs
+          username: modusgradnja
+          port: 336
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          local_path: './_deploy/*'
+          remote_path: ${{ vars.REMOTE_PATH || '/htdocs' }}
+          sftp_only: true          # bez rsync-a: deljeni hosting retko ima ljusku
+          delete_remote_files: false
