@@ -79,7 +79,11 @@ jobs:
           server: nino.webhostingsrbija.rs
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ${{ vars.FTP_PROTOCOL || 'ftps' }}
+          # FTPS je proban i server ga odbija ("500 AUTH not understood"),
+          # a SSH/SFTP nije ukljucen u Start paket. Ostaje obican FTP.
+          # Zato nalog 'deploy' postoji samo za ovo i zakljucan je u folder
+          # sajta - lozinka koja putuje otvorenim kanalom ne otvara nista vise.
+          protocol: ${{ vars.FTP_PROTOCOL || 'ftp' }}
           port: 21
           local-dir: ./_deploy/
           # FTP nalog je zakljucan u .../modusgradnja.rs/htdocs, pa mu je
