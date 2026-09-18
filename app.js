@@ -1,12 +1,12 @@
 ﻿/* ==========================================================================
-   MODUS GRADNJA - 3D konfigurator stanova (realni objekat Pr+1+2+Pk, 63 stana)
+   MODUS GRADNJA - 3D konfigurator stanova (realni objekat Pod+Pr+2+Pk, 63 stana)
    Three.js r128 - sopstvena kontrola kamere, bez OrbitControls.
 
    Performanse:
    - render SAMO kad se nesto menja (kamera, hover, animacija) - u mirovanju
      GPU ne radi nista
    - petlja se potpuno pauzira kad 3D sekcija nije na ekranu ili je tab skriven
-   - pixelRatio ogranicen, senke 1024, ~130 draw call-ova ukupno
+   - pixelRatio ogranicen, bez senki, ~130 draw call-ova ukupno
    ========================================================================== */
 (function () {
   'use strict';
@@ -77,6 +77,17 @@
     bindViewToggle();
     renderApartmentCards();
     if (panelEl) renderFloorList();
+    uputstvoZaDodir();
+  }
+
+  /* uputstvo ispod modela mora da opisuje gest koji uredjaj stvarno ima */
+  function uputstvoZaDodir() {
+    var h = document.getElementById('stageHint');
+    if (!h || !window.matchMedia) return;
+    if (window.matchMedia('(hover: none)').matches) {
+      h.textContent = 'Prevuci levo-desno za rotaciju · dva prsta za zumiranje i nagib · ' +
+        'dodirni sprat za pregled stanova';
+    }
   }
 
   /* ================================================================ INIT */
@@ -89,10 +100,11 @@
     var w0 = stage.clientWidth || 960, h0 = stage.clientHeight || 640;
 
     renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false, powerPreference: 'high-performance' });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+    /* na telefonima je gustina piksela 3-4x, a povrsina za crtanje raste sa
+       kvadratom - zato je granica niza nego na desktopu */
+    var mobilni = Math.min(screen.width, screen.height) < 820;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, mobilni ? 1.25 : 1.75));
     renderer.setSize(w0, h0, false);
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.outputEncoding = THREE.sRGBEncoding;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.05;
@@ -135,17 +147,6 @@
 
     var sun = new THREE.DirectionalLight(0xffe8c8, 2.2);
     sun.position.set(55, 70, 45);
-    sun.castShadow = true;
-    sun.shadow.mapSize.width = 1024;
-    sun.shadow.mapSize.height = 1024;
-    sun.shadow.camera.near = 10;
-    sun.shadow.camera.far = 220;
-    sun.shadow.camera.left = -70;
-    sun.shadow.camera.right = 70;
-    sun.shadow.camera.top = 55;
-    sun.shadow.camera.bottom = -25;
-    sun.shadow.bias = -0.0008;
-    sun.shadow.normalBias = 0.03;
     scene.add(sun);
 
     var rim = new THREE.DirectionalLight(0x6f9dff, 0.9);
@@ -165,7 +166,6 @@
     );
     g.rotation.x = -Math.PI / 2;
     g.position.y = -0.02;
-    g.receiveShadow = true;
     scene.add(g);
 
     var grid = new THREE.GridHelper(260, 52, 0x1c232c, 0x12171d);
@@ -179,7 +179,6 @@
       new THREE.MeshStandardMaterial({ color: 0x101318, roughness: 0.9 })
     );
     plaza.position.y = 0.13;
-    plaza.receiveShadow = true;
     scene.add(plaza);
 
     var podium = new THREE.Mesh(
@@ -187,8 +186,6 @@
       new THREE.MeshStandardMaterial({ color: COL.podium, roughness: 0.8 })
     );
     podium.position.y = 0.28;
-    podium.receiveShadow = true;
-    podium.castShadow = true;
     scene.add(podium);
 
     /* parking na istocnom kraju (iz osnove) */
@@ -197,7 +194,6 @@
       new THREE.MeshStandardMaterial({ color: 0x0c0e11, roughness: 0.95 })
     );
     asf.position.set(L / 2 + 9.5, 0.3, 0);
-    asf.receiveShadow = true;
     scene.add(asf);
 
     var lineG = new THREE.BoxGeometry(4.6, 0.02, 0.14);
@@ -218,7 +214,6 @@
     ].forEach(function (d) {
       var m = new THREE.Mesh(new THREE.BoxGeometry(d[2], d[3], 11), mat);
       m.position.set(d[0], d[3] / 2, d[1]);
-      m.castShadow = true; m.receiveShadow = true;
       scene.add(m);
     });
 
@@ -228,8 +223,8 @@
     var crownM = new THREE.MeshStandardMaterial({ color: 0x1c2b1e, roughness: 1 });
     [[-38, 13], [-24, 14], [-8, 14.5], [10, 14], [26, 13.5], [-30, -13.5], [0, -14], [30, -13]]
       .forEach(function (p) {
-        var t = new THREE.Mesh(trunkG, trunkM); t.position.set(p[0], 1.6, p[1]); t.castShadow = true;
-        var c = new THREE.Mesh(crownG, crownM); c.position.set(p[0], 3.9, p[1]); c.castShadow = true;
+        var t = new THREE.Mesh(trunkG, trunkM); t.position.set(p[0], 1.6, p[1]);
+        var c = new THREE.Mesh(crownG, crownM); c.position.set(p[0], 3.9, p[1]);
         c.scale.set(1, 1.15, 1);
         scene.add(t); scene.add(c);
       });
@@ -291,7 +286,6 @@
         mkMat({ color: COL.slab, roughness: 0.75, metalness: 0.05 })
       );
       slab.position.set(0, baseY + 0.14, 0);
-      slab.castShadow = true; slab.receiveShadow = true;
       add(rec, slab);
 
       /* stanovi - pozicije ocitane iz osnova (jug / sever / pun gabarit) */
@@ -306,7 +300,6 @@
         var mat = mkMat({ color: COL.unit, roughness: 0.62, metalness: 0.1, emissive: 0x000000 });
         var mesh = new THREE.Mesh(new THREE.BoxGeometry(Math.max(w, 0.5), unitH, d), mat);
         mesh.position.set(x, baseY + 0.28 + unitH / 2, z);
-        mesh.castShadow = true; mesh.receiveShadow = true;
         mesh.userData = { unitId: u.id, floorKey: f.key, pick: true };
         add(rec, mesh);
         rec.units[u.id] = mesh;
@@ -322,7 +315,6 @@
           mkMat({ color: 0x1a1c20, roughness: 0.85 })
         );
         gar.position.set(gx, baseY + 0.28 + unitH * 0.45, fd / 2 - dS / 2);
-        gar.castShadow = true; gar.receiveShadow = true;
         add(rec, gar);
       }
 
@@ -344,7 +336,6 @@
       [[-1, -1], [-1, 1], [1, -1], [1, 1]].forEach(function (s) {
         var fin = new THREE.Mesh(new THREE.BoxGeometry(0.32, FH, 0.32), finMat);
         fin.position.set(s[0] * (fw / 2 + 0.1), baseY + FH / 2, s[1] * (fd / 2 + 0.1));
-        fin.castShadow = true;
         add(rec, fin);
       });
 
@@ -361,7 +352,6 @@
             mkMat({ color: COL.slab, roughness: 0.8 })
           );
           lip.position.set(0, baseY + 0.32, sgn * (fd / 2 + 0.55));
-          lip.castShadow = true;
           add(rec, lip);
           var rail = new THREE.Mesh(new THREE.BoxGeometry(fw * 0.92, 1.02, 0.05), railMat);
           rail.position.set(0, baseY + 0.9, sgn * (fd / 2 + 1.06));
@@ -378,13 +368,11 @@
           mkMat({ color: COL.fin, roughness: 0.6, metalness: 0.2 })
         );
         can.position.set(ex, baseY + 2.7, DEP / 2 + 1.3);
-        can.castShadow = true;
         add(rec, can);
         var colMat = mkMat({ color: 0x3c4045, roughness: 0.6, metalness: 0.25 });
         [ex - 2.4, ex + 2.4].forEach(function (cx) {
           var c = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 2.6, 8), colMat);
           c.position.set(cx, baseY + 1.3, DEP / 2 + 2.1);
-          c.castShadow = true;
           add(rec, c);
         });
       }
@@ -406,7 +394,6 @@
           mkMat({ color: COL.roof, roughness: 0.85 })
         );
         roof.position.set(0, baseY + FH - 0.15, 0);
-        roof.castShadow = true; roof.receiveShadow = true;
         add(rec, roof);
 
         var ridge = new THREE.Mesh(
@@ -507,17 +494,32 @@
     var down = false, moved = false, lastX = 0, lastY = 0, startT = 0;
     var pointers = {};
     var pinchStart = null;
+    /* osa gesta na dodir: null = jos se ne zna, 'rot' = mi rotiramo,
+       'skrol' = pustamo stranicu da skroluje i ne diramo kameru */
+    var osa = null, startX = 0, startY = 0, naDodir = false;
 
     canvas.addEventListener('pointerdown', function (e) {
-      canvas.setPointerCapture(e.pointerId);
       pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
-      if (Object.keys(pointers).length === 1) {
-        down = true; moved = false; lastX = e.clientX; lastY = e.clientY; startT = Date.now();
-        canvas.classList.add('dragging');
+      var n = Object.keys(pointers).length;
+      if (n === 1) {
+        down = true; moved = false;
+        lastX = startX = e.clientX; lastY = startY = e.clientY;
+        startT = Date.now();
+        naDodir = (e.pointerType === 'touch');
+        /* mis rotira odmah; kod dodira cekamo da se vidi kuda gest ide */
+        osa = naDodir ? null : 'rot';
+        if (!naDodir) {
+          canvas.setPointerCapture(e.pointerId);
+          canvas.classList.add('dragging');
+        }
         var r0 = canvas.getBoundingClientRect();
         pointer.x = ((e.clientX - r0.left) / r0.width) * 2 - 1;
         pointer.y = -((e.clientY - r0.top) / r0.height) * 2 + 1;
         hoverTest(e.clientX - r0.left, e.clientY - r0.top);
+      } else if (n === 2) {
+        /* dva prsta su uvek nas gest - pinch i nagib */
+        osa = 'rot'; moved = true;
+        hideTip();
       }
     });
 
@@ -532,32 +534,72 @@
       if (ids.length >= 2) {
         var a = pointers[ids[0]], b = pointers[ids[1]];
         var dist = Math.hypot(a.x - b.x, a.y - b.y);
-        if (pinchStart === null) pinchStart = { d: dist, r: cam.tr };
+        var sredY = (a.y + b.y) / 2;
+        if (pinchStart === null) pinchStart = { d: dist, r: cam.tr, y: sredY };
         cam.tr = clamp(pinchStart.r * (pinchStart.d / Math.max(dist, 1)), 30, 190);
+        /* dva prsta gore-dole menjaju nagib */
+        cam.tph = clamp(cam.tph - (sredY - pinchStart.y) * 0.004, 0.14, Math.PI * 0.48);
+        pinchStart.y = sredY;
         moved = true;
         invalidate();
         return;
       }
 
-      if (down) {
-        var dx = e.clientX - lastX, dy = e.clientY - lastY;
-        if (Math.abs(dx) + Math.abs(dy) > 3) moved = true;
-        cam.tth -= dx * 0.006;
-        cam.tph = clamp(cam.tph - dy * 0.005, 0.14, Math.PI * 0.48);
-        lastX = e.clientX; lastY = e.clientY;
-        invalidate();
-      } else {
-        hoverTest(e.clientX - rect.left, e.clientY - rect.top);
+      /* stranica skroluje - ne racunamo pogotke i ne diramo kameru */
+      if (osa === 'skrol') return;
+
+      if (!down) {
+        /* na dodir nema lebdenja pokazivaca, pa nema ni sta da se testira */
+        if (e.pointerType !== 'touch') hoverTest(e.clientX - rect.left, e.clientY - rect.top);
+        return;
       }
+
+      /* jos ne znamo da li je gest rotacija ili skrol stranice */
+      if (osa === null) {
+        var adx = Math.abs(e.clientX - startX), ady = Math.abs(e.clientY - startY);
+        if (adx + ady < 8) return;
+        if (adx > ady) {
+          osa = 'rot';
+          /* krecemo od trenutne tacke, da onih 8px praga ne odu u rotaciju */
+          lastX = e.clientX; lastY = e.clientY;
+          canvas.setPointerCapture(e.pointerId);
+          canvas.classList.add('dragging');
+        } else {
+          /* prst ide gore-dole: ovo je skrol stranice, sklanjamo se */
+          osa = 'skrol'; down = false;
+          S.hoverUnit = null; S.hoverFloor = null; hideTip(); applyStyles();
+          return;
+        }
+      }
+      if (osa !== 'rot') return;
+
+      var dx = e.clientX - lastX, dy = e.clientY - lastY;
+      if (Math.abs(dx) + Math.abs(dy) > 3) moved = true;
+      cam.tth -= dx * 0.006;
+      /* na dodir jednim prstom nema nagiba - vertikala pripada stranici */
+      if (!naDodir) cam.tph = clamp(cam.tph - dy * 0.005, 0.14, Math.PI * 0.48);
+      lastX = e.clientX; lastY = e.clientY;
+      invalidate();
     });
 
     function endPointer(e) {
       delete pointers[e.pointerId];
-      if (Object.keys(pointers).length < 2) pinchStart = null;
-      if (Object.keys(pointers).length === 0) {
+      var ostali = Object.keys(pointers);
+      if (ostali.length < 2) pinchStart = null;
+      /* sa dva prsta na jedan: nastavi od prsta koji je ostao, inace bi
+         se stara pozicija racunala kao ogroman pomeraj */
+      if (ostali.length === 1) {
+        lastX = pointers[ostali[0]].x;
+        lastY = pointers[ostali[0]].y;
+      }
+      if (ostali.length === 0) {
         canvas.classList.remove('dragging');
         if (down && !moved && Date.now() - startT < 500) handleClick();
-        down = false;
+        down = false; osa = null;
+        /* na dodir nema pokazivaca koji odlazi sa stana - sklanjamo oblacic */
+        if (naDodir) {
+          S.hoverUnit = null; S.hoverFloor = null; hideTip(); applyStyles();
+        }
       }
     }
     canvas.addEventListener('pointerup', endPointer);
@@ -587,9 +629,16 @@
   }
 
   function bindResize() {
+    var lastW = 0, lastH = 0;
     function onResize() {
       var w = stage.clientWidth, h = stage.clientHeight;
       if (!w || !h) return;
+      /* Na telefonu se pri skrolu skriva/prikazuje adresna traka i visina
+         skoci za par desetina piksela. Bez ovoga bi se platno menjalo u toku
+         skrola i model bi poskakivao - zato sitne promene same visine
+         ignorisemo. */
+      if (w === lastW && Math.abs(h - lastH) < 90) return;
+      lastW = w; lastH = h;
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h, false);
@@ -663,9 +712,7 @@
   }
 
   function openUnit(id) {
-    var u = M.getUnit(id);
-    /* prodat stan nema svoju ponudu - ne vodi nikuda */
-    if (u && !M.STATUS[u.status].dostupan) return;
+    /* i prodat stan se otvara - na stranici stoji oznaka PRODATO */
     window.location.href = stanURL(id);
   }
 
@@ -675,12 +722,15 @@
   /* ----------------------------------------------------------- tooltip */
   function showUnitTip(px, py, u) {
     if (!u) return;
+    var prodat = (u.status === 'prodat');
     tooltip.innerHTML =
-      '<b>Stan br. ' + u.num + ' · ' + u.strukt.label + (u.duplex ? ' duplex' : '') + '</b>' +
-      '<span style="color:var(--muted)">' + M.a2(u.ukupno) + ' m² · ' + u.etazaNaziv +
+      '<b>Stan br. ' + u.num + ' · ' + u.strukt.label + (u.duplex ? ' duplex' : '') +
+      (prodat ? '<span class="tip-sold">Prodato</span>' : '') + '</b>' +
+      '<span style="color:var(--muted)">' + M.a2(u.redukovano || u.ukupno) + ' m² · ' + u.etazaNaziv +
       (u.terasa ? ' · terasa ' + M.a2(u.terasa) + ' m²' : '') + '</span>' +
       '<div class="tp">' + M.eur(u.cena) + ' € · ' +
-      (M.STATUS[u.status].dostupan ? 'klikni za detalje' : M.STATUS[u.status].label) + '</div>';
+      (prodat ? 'prodato · klikni za detalje'
+              : (u.status === 'rezervisan' ? 'rezervisano · ' : '') + 'klikni za detalje') + '</div>';
     tooltip.style.left = px + 'px';
     tooltip.style.top = py + 'px';
     tooltip.style.opacity = '1';
@@ -845,7 +895,7 @@
     head.innerHTML =
       '<div class="t">Konfigurator stanova</div>' +
       '<h3>Novi stambeni objekat</h3>' +
-      '<p>Pr+2+Pk · ' + st.ukupno + ' stanova · ' + Math.round(st.minA) + '-' + Math.round(st.maxA) + ' m²<br>' +
+      '<p>Pod+Pr+2+Pk · ' + st.ukupno + ' stanova · ' + Math.round(st.minA) + '-' + Math.round(st.maxA) + ' m²<br>' +
       '<b style="color:var(--accent);font-weight:600">' + M.eur(M.cenaM2) + ' €/m²</b> sa PDV-om</p>';
 
     var html = chipsHTML();
@@ -891,19 +941,21 @@
     shown.forEach(function (u) {
       var st = M.STATUS[u.status];
       var prodat = !st.dostupan;
-      html += '<button class="unit-card' + (prodat ? ' sold' : '') + '" data-id="' + u.id + '"' +
-        (prodat ? ' disabled aria-disabled="true"' : '') + '>' +
+      html += '<button class="unit-card' + (prodat ? ' sold' : '') + '" data-id="' + u.id + '">' +
         '<div class="uc-top"><b>Stan br. ' + u.num + '</b>' +
-        '<span class="pill ' + u.strukt.key + '">' + u.strukt.label + (u.duplex ? ' · duplex' : '') + '</span></div>' +
+        (prodat
+          ? '<span class="pill prodat">Prodato</span>'
+          : '<span class="pill ' + u.strukt.key + '">' + u.strukt.label + (u.duplex ? ' · duplex' : '') + '</span>') +
+        '</div>' +
         '<div class="uc-meta">' +
-        '<span>' + M.a2(u.ukupno) + ' m²</span>' +
+        '<span>' + M.a2(u.redukovano || u.ukupno) + ' m²</span>' +
         '<span>' + u.beds + (u.beds === 1 ? ' spavaća' : ' spavaće') + '</span>' +
         (u.terasa ? '<span>terasa ' + M.a2(u.terasa) + ' m²</span>' : '') +
-        (u.status !== 'slobodan'
+        (u.status === 'rezervisan'
           ? '<span style="color:' + st.color + ';font-weight:600">' + st.label + '</span>' : '') +
         '</div>' +
         '<div class="uc-price">' + M.eur(u.cena) + ' €' +
-        '<small>' + (prodat ? 'prodato' : M.eur(u.cenaM2) + ' €/m² · detalji →') + '</small></div>' +
+        '<small>' + (prodat ? 'prodato · detalji →' : M.eur(u.cenaM2) + ' €/m² · detalji →') + '</small></div>' +
         '</button>';
     });
     html += '</div>';
@@ -946,7 +998,7 @@
         '<text x="' + (x + w / 2) + '" y="' + (y + h / 2 - 2) + '" text-anchor="middle" ' +
         'font-size="10" font-weight="600" fill="' + c + '">' + u.num + '</text>' +
         '<text x="' + (x + w / 2) + '" y="' + (y + h / 2 + 11) + '" text-anchor="middle" ' +
-        'font-size="7.5" fill="rgba(255,255,255,.45)">' + Math.round(u.ukupno) + ' m²</text></g>';
+        'font-size="7.5" fill="rgba(255,255,255,.45)">' + Math.round(u.redukovano || u.ukupno) + ' m²</text></g>';
     });
     /* sluzbeni blokovi u juznom nizu: ulaz/stepeniste i garaze */
     function block(seg, label) {

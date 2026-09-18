@@ -213,7 +213,10 @@ section{position:relative}
   box-shadow:0 40px 100px -40px rgba(0,0,0,.9);
 }
 .stage{position:relative;min-height:640px;background:radial-gradient(80% 80% at 50% 40%,#141821,#07080a 75%)}
-#scene{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab}
+/* pan-y: vertikalni prevlak ostaje stranici (da se moze proskrolovati preko
+   modela), a vodoravni i pinch su nasi. Bez ovoga pretrazivac i skripta se
+   otimaju oko istog gesta i model na telefonu poskakuje. */
+#scene{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab;touch-action:pan-y}
 #scene.dragging{cursor:grabbing}
 .stage-overlay{position:absolute;inset:0;pointer-events:none;padding:20px;display:flex;flex-direction:column;justify-content:space-between}
 .stage-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
@@ -240,6 +243,12 @@ section{position:relative}
 }
 .tooltip b{display:block;font-size:13px;margin-bottom:3px}
 .tooltip .tp{color:var(--accent);font-weight:600}
+/* oznaka prodatog stana na hover-u - mora da se vidi odmah */
+.tip-sold{
+  display:inline-block;margin-left:8px;padding:2px 7px;border-radius:999px;
+  background:rgba(111,117,126,.22);color:var(--off);
+  font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;vertical-align:middle;
+}
 
 .loader{
   position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;
@@ -285,12 +294,12 @@ section{position:relative}
   transition:.2s;background:transparent;width:100%;text-align:left;color:inherit;
 }
 .unit-card:hover{border-color:var(--accent);background:rgba(200,168,107,.06);transform:translateX(3px)}
-.unit-card.sold{opacity:.5;cursor:default}
-.unit-card.sold:hover{border-color:var(--line);background:transparent;transform:none}
-/* prodat stan u mini-osnovi i u listi srodnih - vidljiv, ali ne poziva na klik */
-.mini-plan .u.sold{cursor:default}
-.card.sold{opacity:.55;cursor:default}
-.card.sold:hover{border-color:var(--line);background:var(--panel);transform:none}
+/* prodat stan je prigusen, ali se i dalje otvara - zato zadrzava hover */
+.unit-card.sold{opacity:.62}
+.unit-card.sold:hover{opacity:1;border-color:var(--off);background:rgba(111,117,126,.08)}
+.mini-plan .u.sold{cursor:pointer}
+.card.sold{opacity:.62}
+.card.sold:hover{opacity:1;border-color:var(--off)}
 .uc-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:7px}
 .uc-top b{font-size:14.5px;font-weight:600}
 .pill{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:999px;font-weight:600}
@@ -366,6 +375,18 @@ footer{border-top:1px solid var(--line);padding:56px 0 34px;background:#07080a}
 .sp{padding-top:118px}
 .crumb{font-size:12.5px;color:var(--muted-2);margin-bottom:26px}
 .crumb a:hover{color:var(--accent)}
+/* traka prodatog stana - stoji iznad naslova, pre svega ostalog */
+.sold-banner{
+  display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
+  margin-bottom:26px;padding:16px 20px;border-radius:12px;
+  background:rgba(111,117,126,.12);border:1px solid rgba(111,117,126,.42);
+}
+.sold-banner b{
+  font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:var(--off);flex:none;
+}
+.sold-banner span{font-size:14px;color:var(--muted)}
+/* prodat stan: cena i naslov priguseni, da traka ostane najjaci signal */
+.sp-head.is-sold .price-box .p{color:var(--off)}
 .sp-head{display:flex;justify-content:space-between;align-items:flex-end;gap:28px;flex-wrap:wrap;padding-bottom:28px;border-bottom:1px solid var(--line)}
 .sp-head h1{font-size:clamp(30px,4.4vw,50px);letter-spacing:-.03em}
 .sp-head .sub{color:var(--muted);margin-top:12px;font-size:15px}
@@ -474,6 +495,15 @@ footer{border-top:1px solid var(--line);padding:56px 0 34px;background:#07080a}
   .hero-stats{gap:32px;margin-top:48px}
   .price-box{text-align:left}
 }
+@media(max-width:640px){
+  /* model ne sme da pojede ceo ekran - mora da se vidi da stranica ide dalje */
+  .stage{min-height:380px}
+  .stage-overlay{padding:14px}
+  .stage-hint{font-size:10.5px;line-height:1.45}
+  /* dugmad za zum na palac, ne na kursor */
+  .sbtn{width:40px;height:40px;font-size:17px}
+  .legend.badge{flex-wrap:wrap;gap:8px 14px;max-width:min(100%,280px)}
+}
 
 /* ---------- napomena o obradi podataka ---------- */
 .privacy-note{
@@ -510,4 +540,129 @@ footer{border-top:1px solid var(--line);padding:56px 0 34px;background:#07080a}
     animation-duration:.01ms!important;animation-iteration-count:1!important;
     transition-duration:.01ms!important;scroll-behavior:auto!important;
   }
+}
+
+/* ==========================================================================
+   GARAŽA - modalni prozor sa shemom i izborom mesta
+   ========================================================================== */
+.g-modal{position:fixed;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;padding:24px}
+.g-backdrop{position:absolute;inset:0;background:rgba(4,5,7,.78);backdrop-filter:blur(6px);opacity:0;transition:opacity .2s}
+.g-modal.in .g-backdrop{opacity:1}
+body.g-open{overflow:hidden}
+
+.g-panel{
+  position:relative;width:100%;max-width:620px;max-height:calc(100vh - 48px);
+  display:flex;flex-direction:column;border-radius:var(--r);
+  background:var(--bg-2);border:1px solid var(--line-2);
+  box-shadow:0 30px 80px rgba(0,0,0,.7);
+  opacity:0;transform:translateY(14px) scale(.985);transition:opacity .22s,transform .22s cubic-bezier(.2,.7,.2,1);
+}
+.g-modal.in .g-panel{opacity:1;transform:none}
+
+.g-head{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;padding:22px 24px 16px;border-bottom:1px solid var(--line)}
+.g-head h2{font-size:22px;margin-top:8px}
+.g-x{
+  flex:none;width:36px;height:36px;border-radius:9px;cursor:pointer;font-size:14px;
+  background:var(--panel);border:1px solid var(--line);color:var(--muted);transition:.2s;
+}
+.g-x:hover{color:var(--txt);border-color:var(--line-2);background:var(--panel-2)}
+
+.g-body{padding:18px 24px 24px;overflow-y:auto}
+
+/* ---------- shema ---------- */
+.g-plan{
+  padding:12px;border-radius:12px;display:flex;justify-content:center;
+  background:
+    linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px) 0 0/20px 20px,
+    linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px) 0 0/20px 20px,
+    var(--bg-3);
+  border:1px solid var(--line);
+}
+/* --g-h je raspoloziva visina; sirinu racuna garaza.js iz odnosa stranica */
+.g-plan{--g-h:64vh}
+.gsvg{width:100%;height:auto;display:block}
+.g-obris{fill:rgba(255,255,255,.015);stroke:var(--line-2);stroke-width:2.4;stroke-linejoin:round}
+
+/* stepeniste, lift, stubovi - neprohodno */
+.g-el rect{fill:rgba(255,255,255,.05);stroke:var(--line);stroke-width:1.2;stroke-dasharray:5 4}
+.g-el text{
+  font-size:15px;fill:var(--muted-2);font-family:var(--ff);letter-spacing:.04em;
+  pointer-events:none;
+}
+
+/* ulazi */
+.g-ulaz-m path{fill:none;stroke:var(--accent);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.g-ulaz-m text{
+  font-size:19px;font-weight:600;fill:var(--accent);font-family:var(--ff);
+  letter-spacing:.06em;text-transform:uppercase;
+}
+
+.gm{cursor:pointer;outline:none}
+.gm rect{
+  fill:rgba(255,255,255,.05);stroke:var(--line-2);stroke-width:1.6;
+  transition:fill .16s,stroke .16s;
+}
+.gm text{
+  font-size:26px;font-weight:600;fill:var(--muted);font-family:var(--ff);
+  pointer-events:none;transition:fill .16s;
+}
+
+/* slobodno -> zeleno, zauzeto -> crveno */
+.gm.slobodno:hover rect,.gm.slobodno:focus-visible rect{fill:rgba(74,222,128,.24);stroke:var(--ok)}
+.gm.slobodno:hover text,.gm.slobodno:focus-visible text{fill:var(--ok)}
+
+/* zauzeto je crveno i bez hover-a - mora da se vidi na prvi pogled */
+.gm.zauzeto{cursor:not-allowed}
+.gm.zauzeto rect{fill:rgba(224,101,90,.2);stroke:rgba(224,101,90,.72)}
+.gm.zauzeto text{fill:#e0655a}
+.gm.zauzeto:hover rect{fill:rgba(224,101,90,.34);stroke:#e0655a;stroke-width:2.2}
+.gm.zauzeto:hover text{fill:#f08a80}
+
+.gm.izabrano rect{fill:rgba(74,222,128,.32);stroke:var(--ok);stroke-width:3}
+.gm.izabrano text{fill:#fff}
+
+/* ---------- legenda i izbor ---------- */
+.g-legenda{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:14px;font-size:12.5px;color:var(--muted)}
+.g-legenda span{display:flex;align-items:center;gap:7px}
+.g-legenda i{width:11px;height:11px;border-radius:3px;display:block;flex:none}
+.g-legenda i.sl{background:rgba(74,222,128,.25);border:1px solid var(--ok)}
+.g-legenda i.za{background:rgba(224,101,90,.18);border:1px solid rgba(224,101,90,.6)}
+.g-hint{margin-left:auto;color:var(--muted-2);font-size:11.5px}
+
+.g-izbor{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  margin-top:16px;padding-top:16px;border-top:1px solid var(--line);min-height:44px;
+}
+.g-prazno{font-size:13.5px;color:var(--muted-2)}
+.g-odabrano{display:flex;flex-direction:column;gap:2px}
+.g-odabrano b{font-size:17px;color:var(--ok)}
+.g-odabrano span{font-size:12.5px;color:var(--muted)}
+
+/* ---------- dugme na stranici stana ---------- */
+/* Trece dugme u nizu - ne sme da bude jos jedan providan okvir, inace se
+   izgubi ispod "Pozovi". Popunjeno je, ali prigusenije od zlatnog CTA. */
+.btn-garaza{
+  display:inline-flex;align-items:center;gap:9px;margin-top:10px;width:100%;
+  justify-content:center;
+  background:rgba(200,168,107,.12);border-color:rgba(200,168,107,.45);
+  color:var(--accent-2);font-weight:600;
+}
+.btn-garaza:hover{
+  background:rgba(200,168,107,.22);border-color:var(--accent);
+  color:var(--accent-2);transform:translateY(-2px);
+}
+.btn-garaza::before{
+  content:'';width:15px;height:11px;border-radius:2px;flex:none;
+  border:1.5px solid currentColor;border-bottom-width:3px;opacity:.9;
+}
+
+@media(max-width:640px){
+  .g-modal{padding:0}
+  .g-panel{max-width:100%;max-height:100dvh;height:100dvh;border-radius:0;border:0}
+  .g-head{padding:16px 16px 12px}
+  .g-head h2{font-size:19px}
+  .g-body{padding:14px 16px 20px}
+  .g-plan{--g-h:58vh}
+  .g-hint{margin-left:0;width:100%}
+  .g-izbor .btn{width:100%;justify-content:center}
 }

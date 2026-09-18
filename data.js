@@ -3,7 +3,7 @@ window.MODUS_DATA = {
   "_napomena": "Podaci izvuceni iz prodajnih listova u img/stanovi/ (05.jpg - 37.jpg). Sve povrsine u m2. 'tipovi' su jedinstveni rasporedi; 'jedinice' mapira svaki stan na svoj tip. NEDOSTAJU: cene, statusi (slobodan/rezervisan/prodat), adresa objekta, orijentacija po stanu.",
 
   "objekat": {
-    "spratnost": "Pr + 1 + 2 + Pk",
+    "spratnost": "Pod+Pr+2+Pk",
     "etaza": [
       { "kljuc": "PR", "naziv": "Prizemlje",  "opseg": "C01-C15", "stanova": 15, "povrsina": 826.05 },
       { "kljuc": "1",  "naziv": "Prvi sprat", "opseg": "C16-C31", "stanova": 16, "povrsina": 939.05 },
@@ -52,7 +52,7 @@ window.MODUS_DATA = {
     "T63": { "sp": 1, "zatvoreno": 42.72, "terasa":  6.95, "ukupno": 49.67, "redukovano": 48.39, "sobe": ["hodnik 3.06","kupatilo 4.80","kuhinja 4.42","dnevna soba sa trpezarijom 13.60","degazman 5.40","spavaca soba 11.44"] }
   },
 
-  "_drugaZgrada": "Objekat Milosa Obrenovica - 7 stanova u ponudi. Podaci sa prodajnih listova u img/druga-zgrada/. Struktura je preuzeta doslovno sa lista (investitorova oznaka).",
+  "_drugaZgrada": "Objekat Milosa Obrenovica - 5 stanova u ponudi. Podaci sa prodajnih listova u img/druga-zgrada/. Struktura je preuzeta doslovno sa lista (investitorova oznaka).",
   "drugaZgrada": {
     "naziv": "Miloša Obrenovića",
     "tipovi": {
@@ -63,17 +63,13 @@ window.MODUS_DATA = {
       "M10": { "struktura": "Trosoban",      "ukupno": 72.89, "terasa": 3.40, "list": "s10,18.jpeg",
                "sobe": ["hodnik 11.23","spavaca soba 10.48","spavaca soba 12.13","dnevni boravak 24.76","kupatilo 5.34","kuhinja 5.55"] },
       "M14": { "struktura": "Dvosoban",      "ukupno": 67.43, "terasa": 5.00, "list": "s14.jpeg",
-               "sobe": ["hodnik 8.30","spavaca soba 14.56","dnevni boravak 27.93","kupatilo 4.78","kuhinja 6.86"] },
-      "M17": { "struktura": "Jednoiposoban", "ukupno": 47.82, "terasa": 3.44, "list": "s17.jpeg",
-               "sobe": ["hodnik 4.85","spavaca soba 10.09","dnevni boravak 16.36","kupatilo 4.89","kuhinja 8.19"] }
+               "sobe": ["hodnik 8.30","spavaca soba 14.56","dnevni boravak 27.93","kupatilo 4.78","kuhinja 6.86"] }
     },
     "jedinice": [
       { "broj": 1,  "etaza": "Prizemlje",   "tip": "M1"  },
-      { "broj": 5,  "etaza": "Prvi sprat",  "tip": "M5"  },
       { "broj": 10, "etaza": "Prvi sprat",  "tip": "M10" },
       { "broj": 13, "etaza": "Drugi sprat", "tip": "M5"  },
       { "broj": 14, "etaza": "Drugi sprat", "tip": "M14" },
-      { "broj": 17, "etaza": "Drugi sprat", "tip": "M17" },
       { "broj": 18, "etaza": "Drugi sprat", "tip": "M10" }
     ]
   },
@@ -167,9 +163,13 @@ window.MODUS_DATA = {
   var FLOOR_NAMES = { 'PR': 'Prizemlje', '1': 'Prvi sprat', '2': 'Drugi sprat', 'PK': 'Potkrovlje' };
 
   /* ------------------------------------------------------------ cene ----
-     Cene su SA PDV-om, po objektu. Obracunska povrsina je UKUPNA NETO
-     (zatvoreno + terasa), onako kako stoji na prodajnim listovima -
-     terase se naplacuju punom kvadraturom, bez redukcije.
+     Cene su SA PDV-om, po objektu.
+
+     Kneza Sime Markovica: obracunska povrsina je REDUKOVANA (-3%), ona
+     ista koja se prikazuje na hover-u u 3D modelu i u specifikaciji.
+
+     Milosa Obrenovica: prodajni listovi nemaju redukovanu povrsinu, pa
+     osnovica ostaje ukupna neto (zatvoreno + terasa).
 
      Za promenu cene menja se samo vrednost ovde.                       */
   var CENA_M2 = 1760;      // Kneza Sime Markovica
@@ -180,9 +180,15 @@ window.MODUS_DATA = {
 
        var STATUSI = { 'C05': 'rezervisan', 'C12': 'prodat', 'M13': 'prodat' };
 
-     Prazan objekat znaci da su svi slobodni. Prodati stanovi se u listi i
-     u 3D prikazu prigusuju i ne mogu se otvoriti.                      */
-  var STATUSI = {};
+     Prazan objekat znaci da su svi slobodni. Prodati stanovi se u listi
+     i u 3D prikazu prigusuju (sivo, bez boje strukture), ali se i dalje
+     mogu otvoriti - na stranici stoji jasna oznaka PRODATO.            */
+  var STATUSI = {
+    'C06': 'prodat', 'C09': 'prodat', 'C22': 'prodat', 'C25': 'prodat',
+    'C26': 'prodat', 'C27': 'prodat', 'C28': 'prodat', 'C29': 'prodat',
+    'C36': 'prodat', 'C37': 'prodat', 'C38': 'prodat', 'C44': 'prodat',
+    'C45': 'prodat', 'C47': 'prodat', 'C53': 'prodat'
+  };
 
   var STATUS = {
     slobodan:   { label: 'Slobodan',   color: '#4ade80', dostupan: true  },
@@ -229,7 +235,7 @@ window.MODUS_DATA = {
       strukt: st,
       list: j.list,
       cenaM2: CENA_M2,
-      cena: Math.round(t.ukupno * CENA_M2),  /* osnovica: ukupna neto */
+      cena: Math.round((t.redukovano || t.ukupno) * CENA_M2),  /* osnovica: redukovana */
       status: statusOf(j.id)
     };
   });
@@ -344,7 +350,7 @@ window.MODUS_DATA = {
     var sc = (fd - GEO.CORR) / (dN + dS);
     dN *= sc; dS *= sc;
 
-    var areas = us.map(function (u) { return u.ukupno; });
+    var areas = us.map(function (u) { return u.redukovano || u.ukupno; });
     var cene = us.map(function (u) { return u.cena; });
     return {
       key: k,
@@ -416,10 +422,115 @@ window.MODUS_DATA = {
     radnoVreme: '8-16h radnim danima'
   };
 
+  /* ------------------------------------------------------- garaza ------
+     47 garaznih mesta, jedna garaza sa tri kolske rampe. Polozaj svakog
+     mesta je preuzet iz koordinata oznaka na projektu (img/garazapdf.pdf):
+     redosled, grupisanje u redove i medjusobni odnos su iz crteza.
+     Ovo je shema za izbor mesta, ne gradjevinski crtez.
+
+     x, y, w, h su u jedinicama crteza (sirina 531, visina 1149).
+     Mesto polozeno vodoravno ima w > h, uspravno h > w.
+
+     ZAUZETA MESTA se upisuju u GARAZA_ZAUZETO, isto kao STATUSI za stanove.
+     Podrazumevano je svako mesto slobodno.                              */
+  var GARAZA_ZAUZETO = {
+    3: true, 9: true, 16: true, 17: true, 18: true,
+    19: true, 20: true, 21: true, 26: true, 27: true
+  };
+
+  var GARAZA = {
+    naziv: 'Garaža',
+    sirina: 492, visina: 1149,
+    mesta: [
+      { n:  1, x:   0, y: 757, w: 98, h: 48 },
+      { n:  2, x:   0, y: 808, w: 98, h: 48 },
+      { n:  3, x:   0, y: 855, w: 98, h: 48 },
+      { n:  4, x:   0, y: 906, w: 98, h: 48 },
+      { n:  5, x:   0, y: 953, w: 98, h: 48 },
+      { n:  6, x:   0, y: 1005, w: 98, h: 48 },
+      { n:  7, x:   0, y: 1052, w: 98, h: 48 },
+      { n:  8, x:   0, y: 1101, w: 98, h: 48 },
+      { n:  9, x: 259, y: 1101, w: 98, h: 48 },
+      { n: 10, x: 259, y: 1052, w: 98, h: 48 },
+      { n: 11, x: 259, y: 1005, w: 98, h: 48 },
+      { n: 12, x: 259, y: 954, w: 98, h: 48 },
+      { n: 13, x: 259, y: 907, w: 98, h: 48 },
+      { n: 14, x: 259, y: 855, w: 98, h: 48 },
+      { n: 15, x: 259, y: 808, w: 98, h: 48 },
+      { n: 16, x: 259, y: 757, w: 98, h: 48 },
+      { n: 17, x: 259, y: 687, w: 98, h: 48 },
+      { n: 18, x:  27, y: 497, w: 48, h: 98 },
+      { n: 19, x:  74, y: 497, w: 48, h: 98 },
+      { n: 20, x: 125, y: 497, w: 48, h: 98 },
+      { n: 21, x: 284, y: 497, w: 48, h: 98 },
+      { n: 22, x: 344, y: 497, w: 48, h: 98 },
+      { n: 23, x: 345, y: 327, w: 48, h: 98 },
+      { n: 24, x: 294, y: 327, w: 48, h: 98 },
+      { n: 25, x: 246, y: 327, w: 48, h: 98 },
+      { n: 26, x: 195, y: 327, w: 48, h: 98 },
+      { n: 27, x: 125, y: 327, w: 48, h: 98 },
+      { n: 28, x:  74, y: 327, w: 48, h: 98 },
+      { n: 29, x:  27, y: 327, w: 48, h: 98 },
+      { n: 30, x:  27, y: 229, w: 48, h: 98 },
+      { n: 31, x:  74, y: 229, w: 48, h: 98 },
+      { n: 32, x: 125, y: 229, w: 48, h: 98 },
+      { n: 33, x: 195, y: 229, w: 48, h: 98 },
+      { n: 34, x: 246, y: 229, w: 48, h: 98 },
+      { n: 35, x: 294, y: 229, w: 48, h: 98 },
+      { n: 36, x: 345, y: 229, w: 48, h: 98 },
+      { n: 37, x: 396, y: 229, w: 48, h: 98 },
+      { n: 38, x: 444, y: 229, w: 48, h: 98 },
+      { n: 39, x: 444, y:   0, w: 48, h: 98 },
+      { n: 40, x: 396, y:   0, w: 48, h: 98 },
+      { n: 41, x: 345, y:   0, w: 48, h: 98 },
+      { n: 42, x: 294, y:   0, w: 48, h: 98 },
+      { n: 43, x: 246, y:   0, w: 48, h: 98 },
+      { n: 44, x: 195, y:   0, w: 48, h: 98 },
+      { n: 45, x: 125, y:   0, w: 48, h: 98 },
+      { n: 46, x:  74, y:   0, w: 48, h: 98 },
+      { n: 47, x:  27, y:   0, w: 48, h: 98 }
+    ],
+    ulazi: [
+      { x: 0, y: 700, naziv: 'Ulaz' },
+      { x: 0, y: 480, naziv: 'Ulaz' },
+      { x: 0, y: 181, naziv: 'Ulaz' }
+    ],
+
+    /* Obris nije pravougaonik - desna ivica se stepenasto suzava nadole,
+       kao na projektu. Tacke idu u smeru kazaljke od gornjeg levog ugla. */
+    obris: [
+      [17, -10], [502, -10], [502, 327], [403, 327], [403, 641],
+      [367, 641], [367, 1159], [-10, 1159], [-10, 641], [17, 641]
+    ],
+
+    /* Neprohodni delovi - poklapaju se sa prazninama izmedju mesta i
+       ponavljaju se kroz redove, kao sarafirani blokovi na projektu. */
+    elementi: [
+      { x: 173, y: 497, w: 111, h: 98, naziv: 'Stepenište i lift' },
+      { x: 173, y: 0,   w: 22,  h: 98 },
+      { x: 173, y: 229, w: 22,  h: 196 }
+    ]
+  };
+
+  /* broj mesta -> { broj, slobodno } */
+  var garMesta = {};
+  GARAZA.mesta.forEach(function (m) {
+    garMesta[m.n] = { broj: m.n, slobodno: !GARAZA_ZAUZETO[m.n] };
+  });
+
   window.MODUS = {
     data: D,
     geo: GEO,
     kontakt: KONTAKT,
+    garaza: GARAZA,
+    garMesto: function (n) { return garMesta[n] || null; },
+    garStats: function () {
+      var uk = 0, sl = 0;
+      Object.keys(garMesta).forEach(function (k) {
+        uk++; if (garMesta[k].slobodno) sl++;
+      });
+      return { ukupno: uk, slobodnih: sl, zauzetih: uk - sl };
+    },
     units: units,
     floors: floors,
     STRUKT: STRUKT,
@@ -439,7 +550,7 @@ window.MODUS_DATA = {
     a2: a2,
     range: function (f) { return Math.round(f.minA) + '-' + Math.round(f.maxA) + ' m²'; },
     stats: function () {
-      var all = units.map(function (u) { return u.ukupno; });
+      var all = units.map(function (u) { return u.redukovano || u.ukupno; });
       return {
         ukupno: units.length,
         minA: Math.min.apply(null, all),

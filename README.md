@@ -102,12 +102,33 @@ samo izuzeci:
 var STATUSI = { 'C05': 'rezervisan', 'C12': 'prodat', 'M13': 'prodat' };
 ```
 
-Prodati stanovi se prigušuju u listi, mini-osnovi i 3D prikazu, i ne otvaraju se.
+Prodati stanovi se prigušuju u listi, mini-osnovi i 3D prikazu, ali se i dalje
+otvaraju - na stranici stana stoji traka **PRODATO**.
+
+### Zauzeta garažna mesta
+
+U `data.js`, objekat `GARAZA_ZAUZETO` - podrazumevano je **svako mesto
+slobodno**, upisuju se samo zauzeta:
+
+```js
+var GARAZA_ZAUZETO = { 3: true, 12: true, 40: true };
+```
+
+Zauzeto mesto je crveno u shemi i ne može da se izabere. Broj slobodnih i
+zauzetih u legendi se računa sam.
+
+Shema garaže (`garaza.js`) otvara se dugmetom **Izaberi garažno mesto** na
+stranici svakog stana. Raspored je jedna garaža sa 47 mesta i tri ulaza,
+u objektu `GARAZA` u `data.js`. Položaj svakog mesta (`x`, `y`, `w`, `h`)
+izveden je iz koordinata oznaka u `img/garazapdf.pdf`.
 
 ### Cene
 
 U `data.js`: `CENA_M2` (Kneza Sime Markovića) i `CENA_M2_DZ` (Miloša Obrenovića).
-Obračun ide po ukupnoj neto površini, sa PDV-om.
+
+- Kneza Sime Markovića: obračun po **redukovanoj** površini (-3%), sa PDV-om
+- Miloša Obrenovića: po ukupnoj neto površini, sa PDV-om (prodajni listovi
+  tog objekta nemaju redukovanu površinu)
 
 ### Posle svake izmene cena ili statusa
 
@@ -115,8 +136,10 @@ Obračun ide po ukupnoj neto površini, sa PDV-om.
 node build-stanovi.js
 ```
 
-Regeneriše svih 70 stranica u `stan/` i `sitemap.xml`. **Obavezno** - inače
+Regeneriše svih 68 stranica u `stan/` i `sitemap.xml`. **Obavezno** - inače
 statičke stranice zadrže stare cene i statuse u meta oznakama.
+
+Izmena `GARAZA_ZAUZETO` **ne** traži regenerisanje - shema se crta u pregledaču.
 
 ### Podaci o stanovima
 

@@ -134,7 +134,14 @@
     '<a href="' + ROOT + 'index.html#stanovi">Stanovi</a> · ' +
     '<span>' + objekat + '</span> · <span style="color:var(--txt)">' + naslov + '</span></div>';
 
-  html += '<div class="sp-head">' +
+  /* prodat stan - traka preko cele sirine, prvo sto se vidi na stranici */
+  if (u.status === 'prodat') {
+    html += '<div class="sold-banner"><b>Prodato</b>' +
+      '<span>Ovaj stan više nije u ponudi. Pogledajte slične stanove niže na stranici ' +
+      'ili nas pozovite za trenutno dostupne.</span></div>';
+  }
+
+  html += '<div class="sp-head' + (u.status === 'prodat' ? ' is-sold' : '') + '">' +
     '<div>' +
     '<span class="pill ' + strukt.key + '"' + pillAttr + '>' + strukt.label + (u.duplex ? ' · Duplex' : '') + '</span>' +
     '<span class="pill" style="margin-left:8px;background:' + ST.color + '22;color:' + ST.color + '">' + ST.label + '</span>' +
@@ -144,7 +151,7 @@
     '</div>' +
     '<div class="price-box">' +
     '<div class="p">' + M.eur(u.cena) + ' €</div>' +
-    '<div class="pm">' + M.eur(u.cenaM2) + ' €/m² sa PDV-om · ' + M.a2(u.ukupno) + ' m²</div>' +
+    '<div class="pm">' + M.eur(u.cenaM2) + ' €/m² sa PDV-om · ' + M.a2(u.redukovano || u.ukupno) + ' m²</div>' +
     '</div></div>';
 
   html += '<div class="sp-grid">';
@@ -172,7 +179,7 @@
     '<p class="eyebrow">Specifikacija</p>' +
     '<div class="spec">' +
       row('Objekat', objekat) +
-      row('Oznaka stana', isDZ ? ('S' + u.num) : u.id) +
+      row('Oznaka stana', 'S' + u.num) +
       row('Struktura', strukt.label + (u.duplex ? ', duplex' : '')) +
       row('Sprat', u.etazaNaziv) +
       row('Spavaće sobe', u.beds) +
@@ -189,6 +196,11 @@
       '<a class="btn btn-primary" href="' + TEL_1_HREF + '">Pozovi ' + TEL_1 + '</a>' +
       '<a class="btn btn-ghost" href="#upit">Pošalji upit</a>' +
     '</div>' +
+    /* garaza je zajednicka za objekat, pa stoji uz svaki stan */
+    (M.garaza
+      ? '<button class="btn btn-ghost btn-garaza" id="btnGaraza" type="button">' +
+        'Izaberi garažno mesto</button>'
+      : '') +
     '<div class="mini-bldg"><div class="mt">Pozicija u objektu</div>' + buildingSVG(u.etaza) + '</div>' +
     '<div class="mini-bldg">' +
       '<div class="mt">Kontakt prodaje</div>' +
@@ -225,20 +237,24 @@
     others.forEach(function (x) {
       var pa = x.dz ? ' style="background:' + x.strukt.color + '22;color:' + x.strukt.color + '"' : '';
       var sx = M.STATUS[x.status];
-      /* prodat stan ostaje u listi radi preglednosti, ali nije link */
-      html += (sx.dostupan ? '<a class="card" href="' + stanURL(x.id) + '">' : '<div class="card sold">') +
+      /* i prodat stan je link - prigusen je, a oznaka stoji na kartici */
+      var prodatX = (x.status === 'prodat');
+      html += '<a class="card' + (prodatX ? ' sold' : '') + '" href="' + stanURL(x.id) + '">' +
         '<div class="uc-top"><b style="font-size:16px">Stan ' + (x.dz ? '' : 'br. ') + x.num + '</b>' +
-        '<span class="pill ' + x.strukt.key + '"' + pa + '>' + x.strukt.label + '</span></div>' +
+        (prodatX
+          ? '<span class="pill prodat">Prodato</span>'
+          : '<span class="pill ' + x.strukt.key + '"' + pa + '>' + x.strukt.label + '</span>') +
+        '</div>' +
         '<div class="uc-meta" style="margin-top:8px">' +
-        '<span>' + M.a2(x.ukupno) + ' m²</span>' +
+        '<span>' + M.a2(x.redukovano || x.ukupno) + ' m²</span>' +
         '<span>' + x.beds + (x.beds === 1 ? ' spavaća' : ' spavaće') + '</span>' +
         (x.terasa ? '<span>terasa ' + M.a2(x.terasa) + ' m²</span>' : '') +
-        (x.status !== 'slobodan'
+        (x.status === 'rezervisan'
           ? '<span style="color:' + sx.color + ';font-weight:600">' + sx.label + '</span>' : '') +
         '</div>' +
         '<div class="uc-price">' + M.eur(x.cena) + ' €' +
         (x.duplex ? '<small>duplex, dva nivoa</small>' : '') + '</div>' +
-        (sx.dostupan ? '</a>' : '</div>');
+        '</a>';
     });
     html += '</div></section>';
   }
@@ -270,6 +286,15 @@
 
   function row(k, v) {
     return '<div class="r"><span>' + k + '</span><b>' + v + '</b></div>';
+  }
+
+  /* shema garaze - garaza.js se ucitava posle ovog fajla */
+  var bg = document.getElementById('btnGaraza');
+  if (bg) {
+    bg.onclick = function () {
+      var G = window.MODUS_GARAZA;
+      if (G) G.otvori(bg);
+    };
   }
 
   /* slanje upita - mamac, vremenska zamka i slanje su u site.js */
