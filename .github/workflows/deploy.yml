@@ -14,7 +14,8 @@
 # Podesava se u: Settings > Secrets and variables > Actions
 #   tajna      FTP_PASSWORD  - lozinka FTP naloga napravljenog u WHSPanelu
 #   promenljiva FTP_PROTOCOL - 'ftps' (podrazumevano) ili 'ftp' ako TLS ne radi
-#   promenljiva REMOTE_PATH  - putanja do foldera sajta, podrazumevano /htdocs/
+#   promenljiva REMOTE_PATH  - odrediste na serveru, podrazumevano './'
+#                              (FTP nalog je zakljucan u folder sajta)
 # ============================================================================
 name: Postavi sajt
 
@@ -81,7 +82,9 @@ jobs:
           protocol: ${{ vars.FTP_PROTOCOL || 'ftps' }}
           port: 21
           local-dir: ./_deploy/
-          server-dir: ${{ vars.REMOTE_PATH || '/htdocs/' }}
+          # FTP nalog je zakljucan u .../modusgradnja.rs/htdocs, pa mu je
+          # taj folder koren - odredista nema dalje od './'
+          server-dir: ${{ vars.REMOTE_PATH || './' }}
           # sam popis stanja ne treba da bude javno citljiv preko sajta
           state-name: .ftp-deploy-state.json
           dangerous-clean-slate: false
