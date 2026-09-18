@@ -146,7 +146,12 @@
     '<span class="pill ' + strukt.key + '"' + pillAttr + '>' + strukt.label + (u.duplex ? ' · Duplex' : '') + '</span>' +
     '<span class="pill" style="margin-left:8px;background:' + ST.color + '22;color:' + ST.color + '">' + ST.label + '</span>' +
     '<h1 style="margin-top:14px">' + naslov + '</h1>' +
-    '<div class="sub">' + objekat + ' · ' + u.etazaNaziv + ' · ' + M.a2(u.zatvoreno) + ' m² zatvorenog prostora' +
+    /* redukovana povrsina je obracunska - po njoj se racuna cena, pa stoji
+       odmah uz naslov. Milosa Obrenovica je nema, tamo ide ukupna neto. */
+    '<div class="sub">' + objekat + ' · ' + u.etazaNaziv + ' · ' +
+    (u.redukovano
+      ? M.a2(u.redukovano) + ' m² redukovane površine'
+      : M.a2(u.ukupno) + ' m² ukupne neto površine') +
     (u.terasa ? ' · terasa ' + M.a2(u.terasa) + ' m²' : '') + '</div>' +
     '</div>' +
     '<div class="price-box">' +

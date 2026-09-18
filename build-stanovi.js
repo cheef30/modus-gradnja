@@ -54,6 +54,62 @@ function opis(u, isDZ) {
     ' · ' + st.label + ' · objekat ' + objekat + '.';
 }
 
+/* ------------------------------------------------------ staticno jezgro
+   Bez ovoga stranica stana je prazna dok se JS ne izvrsi - pretrazivacu
+   ostaju samo meta oznake, a citav sadrzaj (povrsine, cena, prostorije)
+   zavisi od toga da li ce skripta da se izvrti.
+
+   Ovde se ispisuje sustina kao obican HTML, unutar #app. stan.js ga posle
+   prepise bogatijom verzijom, pa posetilac sa JS-om vidi isto sto i pre -
+   samo malo ranije, jer sadrzaj ne ceka skripte.                        */
+
+/* nazivi prostorija u podacima su bez dijakritike - za prikaz se ispravljaju */
+var NAZIV_SOBE = {
+  'spavaca soba': 'spavaća soba',
+  'stepeniste': 'stepenište'
+};
+function sobaNaziv(n) {
+  return NAZIV_SOBE[n] || n;
+}
+
+function jezgro(u, isDZ) {
+  var objekat = isDZ ? M.dz.naziv : 'Kneza Sime Markovića';
+  var strukt = isDZ ? u.struktura : u.strukt.label;
+  var st = M.STATUS[u.status];
+  var naslov = 'Stan ' + (isDZ ? '' : 'br. ') + u.num;
+
+  var s = '<div class="sp-static" id="spStatic">';
+  s += '<p class="eyebrow">' + esc(objekat) + '</p>';
+  s += '<h1>' + esc(naslov) + '</h1>';
+  s += '<p class="lead">' + esc(strukt) + (u.duplex ? ', duplex' : '') +
+       ' · ' + esc(u.etazaNaziv) + ' · ' + esc(st.label) + '</p>';
+
+  s += '<dl>';
+  s += '<dt>Zatvoreni prostor</dt><dd>' + M.a2(u.zatvoreno) + ' m²</dd>';
+  if (u.terasa) s += '<dt>Terasa</dt><dd>' + M.a2(u.terasa) + ' m²</dd>';
+  s += '<dt>Ukupna neto površina</dt><dd>' + M.a2(u.ukupno) + ' m²</dd>';
+  if (u.redukovano) {
+    s += '<dt>Redukovana površina</dt><dd>' + M.a2(u.redukovano) + ' m²</dd>';
+  }
+  s += '<dt>Cena</dt><dd>' + M.eur(u.cena) + ' € · ' +
+       M.eur(u.cenaM2) + ' €/m² sa PDV-om</dd>';
+  s += '</dl>';
+
+  s += '<h2>Prostorije</h2><ul>';
+  u.rooms.forEach(function (r) {
+    /* bez duge crte - na sajtu se namerno ne koristi */
+    s += '<li>' + esc(sobaNaziv(r.n)) + ' · ' + M.a2(r.a) + ' m²</li>';
+  });
+  s += '</ul>';
+
+  /* putanja je namerno bez ../ - prepisivac putanja je dodaje sam */
+  s += '<p class="sp-static-cta">Za obilazak i dodatne informacije pozovite ' +
+       '<a href="' + M.kontakt.tel1Href + '">' + esc(M.kontakt.tel1) + '</a>' +
+       ' ili pogledajte <a href="index.html#stanovi">sve stanove u ponudi</a>.</p>';
+  s += '</div>';
+  return s;
+}
+
 /* --------------------------------------------------- strukturirani podaci
    Google tako zna da je ovo nekretnina sa cenom i povrsinom, a ne obican
    tekst - stranica postaje podobna za bogatije rezultate pretrage.      */
@@ -116,6 +172,10 @@ function build() {
     var url = BASE + 'stan/' + u.id + '.html';
 
     var h = sablon;
+
+    /* staticno jezgro umesto <noscript> poruke - ide pre prepisivanja
+       putanja, da linkovi u njemu dobiju ../ kao i svi ostali */
+    h = h.replace(/[ \t]*<noscript>[\s\S]*?<\/noscript>\n?/, jezgro(u, isDZ) + '\n');
 
     /* putanje su za jedan nivo dublje */
     h = h.replace(/(?:src|href)="(?!https?:|mailto:|tel:|#|\/)([^"]+)"/g,
