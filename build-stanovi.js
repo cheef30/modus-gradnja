@@ -20,7 +20,7 @@
 var fs = require('fs');
 var path = require('path');
 
-var BASE = 'https://cheef30.github.io/modus-gradnja/';
+var BASE = 'https://modusgradnja.rs/';
 var OUT_DIR = path.join(__dirname, 'stan');
 
 /* ucitaj podatke isto kako to radi browser */

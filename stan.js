@@ -63,7 +63,7 @@
      dopunjuju samo za stari oblik stan.html?id=..., da i on nesto kaze. */
   if (!staticPage) {
     (function () {
-      var BASE = 'https://cheef30.github.io/modus-gradnja/';
+      var BASE = 'https://modusgradnja.rs/';
       var objekatMeta = isDZ ? M.dz.naziv : 'Kneza Sime Markovića';
       var opis = 'Stan ' + (isDZ ? '' : 'br. ') + u.num + ', ' +
         (isDZ ? u.struktura : u.strukt.label).toLowerCase() +
