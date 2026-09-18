@@ -30,6 +30,11 @@ var M = global.window.MODUS;
 
 var sablon = fs.readFileSync(path.join(__dirname, 'stan.html'), 'utf8');
 
+/* Sablon ima CRLF na Windowsu, LF na Linuxu. Sve sto se ubacuje mora da
+   prati isti prelom, inace se generisane stranice razlikuju od masine do
+   masine i provera u CI-ju puca bez stvarnog razloga. */
+var EOL = sablon.indexOf('\r\n') !== -1 ? '\r\n' : '\n';
+
 /* ---------------------------------------------------------------- alati */
 function esc(s) {
   return String(s)
@@ -175,7 +180,7 @@ function build() {
 
     /* staticno jezgro umesto <noscript> poruke - ide pre prepisivanja
        putanja, da linkovi u njemu dobiju ../ kao i svi ostali */
-    h = h.replace(/[ \t]*<noscript>[\s\S]*?<\/noscript>\n?/, jezgro(u, isDZ) + '\n');
+    h = h.replace(/[ \t]*<noscript>[\s\S]*?<\/noscript>\r?\n?/, jezgro(u, isDZ) + EOL);
 
     /* putanje su za jedan nivo dublje */
     h = h.replace(/(?:src|href)="(?!https?:|mailto:|tel:|#|\/)([^"]+)"/g,
