@@ -8,8 +8,13 @@
 # Salje se SAMO ono sto sajt koristi. Interni fajlovi (README, pitanja,
 # generator, izvorni JSON) ostaju van servera.
 #
-# Tajne se podesavaju u: Settings > Secrets and variables > Actions
-#   SSH_PRIVATE_KEY  - privatni deploy kljuc (ceo sadrzaj deploy_key)
+# Prenose se samo IZMENJENI fajlovi - akcija cuva na serveru popis stanja
+# (.ftp-deploy-sync-state.json) i poredi ga pri svakom pokretanju.
+#
+# Podesava se u: Settings > Secrets and variables > Actions
+#   tajna      FTP_PASSWORD  - lozinka FTP naloga napravljenog u WHSPanelu
+#   promenljiva FTP_PROTOCOL - 'ftps' (podrazumevano) ili 'ftp' ako TLS ne radi
+#   promenljiva REMOTE_PATH  - putanja do foldera sajta, podrazumevano /htdocs/
 # ============================================================================
 name: Postavi sajt
 
@@ -68,13 +73,15 @@ jobs:
           du -sh _deploy
 
       - name: Posalji na hosting
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.6
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: nino.webhostingsrbija.rs
-          username: modusgradnja
-          port: 336
-          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
-          local_path: './_deploy/*'
-          remote_path: ${{ vars.REMOTE_PATH || '/htdocs' }}
-          sftp_only: true          # bez rsync-a: deljeni hosting retko ima ljusku
-          delete_remote_files: false
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ${{ vars.FTP_PROTOCOL || 'ftps' }}
+          port: 21
+          local-dir: ./_deploy/
+          server-dir: ${{ vars.REMOTE_PATH || '/htdocs/' }}
+          # sam popis stanja ne treba da bude javno citljiv preko sajta
+          state-name: .ftp-deploy-state.json
+          dangerous-clean-slate: false
