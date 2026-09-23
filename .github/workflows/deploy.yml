@@ -44,13 +44,16 @@ jobs:
       # Ako neko zaboravi `node build-stanovi.js` pre commit-a, stranice u
       # stan/ nose stare podatke. Ovde se generisu ponovo i poredi - ako se
       # razlikuju, postavljanje se zaustavlja.
+      # Poredi se samo stan/ - sitemap.xml nosi <lastmod> sa datumom kad je
+      # generator pokrenut, pa bi se razlikovao pri svakom pushu u novom danu
+      # iako se sadrzaj nije promenio.
       - name: Provera da su stranice regenerisane
         run: |
           node build-stanovi.js
-          if ! git diff --quiet; then
+          if ! git diff --quiet -- stan/; then
             echo "::error::Stranice u stan/ nisu usklađene sa podacima."
             echo "Pokreni lokalno: node build-stanovi.js, pa commit-uj izmene."
-            git diff --stat
+            git diff --stat -- stan/
             exit 1
           fi
           echo "Stranice su usklađene."
