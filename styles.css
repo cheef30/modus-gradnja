@@ -100,18 +100,13 @@ section{position:relative}
 
 /* ---------- hero ---------- */
 .hero{min-height:100vh;display:flex;align-items:center;position:relative;overflow:hidden;padding-top:74px}
-/* Render objekta u pozadini. Slika je ispod, a ::before je zatamnjuje toliko
-   da naslov ostane citljiv - zato je poslednji sloj providan, ne pun. */
-.hero-bg{
-  position:absolute;inset:0;z-index:0;
-  background:url('img/objekti/ksm/ksm-03-1400.jpg') center 28%/cover no-repeat,#0b0d10;
-}
+.hero-bg{position:absolute;inset:0;z-index:0}
 .hero-bg::before{
   content:'';position:absolute;inset:0;
   background:
-    radial-gradient(120% 90% at 78% 12%,rgba(200,168,107,.14),transparent 55%),
-    radial-gradient(90% 70% at 10% 88%,rgba(70,110,190,.12),transparent 60%),
-    linear-gradient(100deg,rgba(8,9,11,.94) 0%,rgba(8,9,11,.86) 42%,rgba(8,9,11,.62) 100%);
+    radial-gradient(120% 90% at 78% 12%,rgba(200,168,107,.16),transparent 55%),
+    radial-gradient(90% 70% at 10% 88%,rgba(70,110,190,.14),transparent 60%),
+    linear-gradient(180deg,#0b0d10 0%,#08090b 70%);
 }
 .hero-bg::after{
   content:'';position:absolute;inset:0;opacity:.5;
@@ -692,78 +687,4 @@ body.g-open{overflow:hidden}
   .g-plan{--g-h:58vh}
   .g-hint{margin-left:0;width:100%}
   .g-izbor .btn{width:100%;justify-content:center}
-}
-
-/* ==========================================================================
-   GALERIJA OBJEKATA + uvećan prikaz
-   ========================================================================== */
-.obj{margin-top:52px}
-.obj + .obj{margin-top:64px}
-.obj-head{
-  display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;
-  margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid var(--line);
-}
-.obj-head h3{font-size:23px}
-.obj-head span{font-size:13px;color:var(--muted-2);letter-spacing:.02em}
-
-.gal{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.gal-i{
-  padding:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;
-  background:var(--bg-3);cursor:zoom-in;display:block;position:relative;
-  transition:border-color .25s,transform .25s;
-}
-.gal-i img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s cubic-bezier(.2,.7,.2,1)}
-.gal-i:hover{border-color:var(--accent)}
-.gal-i:hover img{transform:scale(1.04)}
-/* prva slika je veca - nosi sekciju */
-.gal-i:first-child{grid-column:span 2;grid-row:span 2}
-
-/* ---------- uvećan prikaz ---------- */
-.lb{position:fixed;inset:0;z-index:140;display:flex;align-items:center;justify-content:center}
-.lb-bg{position:absolute;inset:0;background:rgba(4,5,7,.93);backdrop-filter:blur(4px);opacity:0;transition:opacity .2s}
-.lb.in .lb-bg{opacity:1}
-body.lb-open{overflow:hidden}
-
-.lb-in{
-  position:relative;max-width:min(94vw,1100px);max-height:88vh;
-  display:flex;flex-direction:column;gap:12px;
-  opacity:0;transform:scale(.97);transition:opacity .22s,transform .22s cubic-bezier(.2,.7,.2,1);
-}
-.lb.in .lb-in{opacity:1;transform:none}
-.lb-in img{
-  max-width:100%;max-height:78vh;width:auto;height:auto;
-  border-radius:10px;object-fit:contain;margin:0 auto;
-}
-.lb-cap{
-  display:flex;justify-content:space-between;align-items:center;gap:18px;
-  font-size:13px;color:var(--muted);padding:0 4px;
-}
-.lb-cap b{color:var(--accent);font-weight:600;flex:none}
-
-.lb-x,.lb-nav{
-  position:absolute;z-index:2;border-radius:999px;cursor:pointer;
-  background:rgba(255,255,255,.07);border:1px solid var(--line-2);color:var(--txt);
-  transition:.2s;display:flex;align-items:center;justify-content:center;
-}
-.lb-x{top:22px;right:22px;width:42px;height:42px;font-size:15px}
-.lb-nav{top:50%;transform:translateY(-50%);width:50px;height:50px;font-size:28px;line-height:1;padding-bottom:4px}
-.lb-p{left:22px}
-.lb-n{right:22px}
-.lb-x:hover,.lb-nav:hover{background:var(--accent);border-color:var(--accent);color:#12100b}
-
-@media(max-width:860px){
-  .gal{grid-template-columns:repeat(2,1fr);gap:10px}
-  .gal-i:first-child{grid-column:span 2;grid-row:auto}
-}
-@media(max-width:640px){
-  .obj{margin-top:38px}
-  .obj + .obj{margin-top:46px}
-  .obj-head h3{font-size:19px}
-  .gal{gap:8px}
-  .lb-nav{width:42px;height:42px;font-size:24px}
-  .lb-p{left:10px}
-  .lb-n{right:10px}
-  .lb-x{top:14px;right:14px}
-  .lb-in{max-width:96vw}
-  .lb-in img{max-height:70vh}
 }
