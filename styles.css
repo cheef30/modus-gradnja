@@ -697,24 +697,25 @@ body.g-open{overflow:hidden}
 /* ==========================================================================
    GALERIJA OBJEKATA + uvećan prikaz
    ========================================================================== */
-/* Galerija stoji unutar panela objekta, ispod 3D modela odnosno kartica -
-   uz sam objekat, a ne u zasebnoj sekciji. */
-.gal-head{
-  display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;
-  margin:44px 0 20px;padding-bottom:14px;border-bottom:1px solid var(--line);
+/* Traka rendera iznad modela odnosno kartica. Jedan red sitnih slicica -
+   nagovestaj kako objekat izgleda, klik otvara veliku sliku. Slike zadrzavaju
+   svoj odnos stranica, pa se ne secu. */
+.gal{
+  display:flex;gap:10px;margin-bottom:22px;
+  overflow-x:auto;padding-bottom:4px;scrollbar-width:thin;
+  -webkit-overflow-scrolling:touch;
 }
-.gal-head h3{font-size:20px}
-.gal-head span{font-size:12.5px;color:var(--muted-2);letter-spacing:.02em}
+.gal::-webkit-scrollbar{height:5px}
+.gal::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:999px}
 
-.gal{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .gal-i{
-  padding:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;
-  background:var(--bg-3);cursor:zoom-in;display:block;position:relative;
-  transition:border-color .25s,transform .25s;
+  flex:0 0 auto;padding:0;border:1px solid var(--line);border-radius:8px;
+  overflow:hidden;background:var(--bg-3);cursor:zoom-in;display:block;
+  height:96px;transition:border-color .25s;
 }
-.gal-i img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s cubic-bezier(.2,.7,.2,1)}
+.gal-i img{height:100%;width:auto;display:block;transition:transform .45s cubic-bezier(.2,.7,.2,1)}
 .gal-i:hover{border-color:var(--accent)}
-.gal-i:hover img{transform:scale(1.04)}
+.gal-i:hover img{transform:scale(1.06)}
 
 /* ---------- uvećan prikaz ---------- */
 .lb{position:fixed;inset:0;z-index:140;display:flex;align-items:center;justify-content:center}
@@ -749,13 +750,9 @@ body.lb-open{overflow:hidden}
 .lb-n{right:22px}
 .lb-x:hover,.lb-nav:hover{background:var(--accent);border-color:var(--accent);color:#12100b}
 
-@media(max-width:860px){
-  .gal{grid-template-columns:repeat(2,1fr);gap:10px}
-}
 @media(max-width:640px){
-  .gal-head{margin-top:32px}
-  .gal-head h3{font-size:18px}
-  .gal{gap:8px}
+  .gal{gap:8px;margin-bottom:18px}
+  .gal-i{height:76px}
   .lb-nav{width:42px;height:42px;font-size:24px}
   .lb-p{left:10px}
   .lb-n{right:10px}
