@@ -700,20 +700,15 @@ body.g-open{overflow:hidden}
 /* Traka rendera iznad modela odnosno kartica. Jedan red sitnih slicica -
    nagovestaj kako objekat izgleda, klik otvara veliku sliku. Slike zadrzavaju
    svoj odnos stranica, pa se ne secu. */
-.gal{
-  display:flex;gap:10px;margin-bottom:22px;
-  overflow-x:auto;padding-bottom:4px;scrollbar-width:thin;
-  -webkit-overflow-scrolling:touch;
-}
-.gal::-webkit-scrollbar{height:5px}
-.gal::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:999px}
+.gal{display:flex;gap:12px;margin-bottom:26px}
 
+/* svaka slika uzima jednak deo sirine - red popunjava ceo div */
 .gal-i{
-  flex:0 0 auto;padding:0;border:1px solid var(--line);border-radius:8px;
+  flex:1 1 0;min-width:0;padding:0;border:1px solid var(--line);border-radius:10px;
   overflow:hidden;background:var(--bg-3);cursor:zoom-in;display:block;
-  height:96px;transition:border-color .25s;
+  transition:border-color .25s;
 }
-.gal-i img{height:100%;width:auto;display:block;transition:transform .45s cubic-bezier(.2,.7,.2,1)}
+.gal-i img{width:100%;height:auto;display:block;transition:transform .45s cubic-bezier(.2,.7,.2,1)}
 .gal-i:hover{border-color:var(--accent)}
 .gal-i:hover img{transform:scale(1.06)}
 
@@ -750,9 +745,14 @@ body.lb-open{overflow:hidden}
 .lb-n{right:22px}
 .lb-x:hover,.lb-nav:hover{background:var(--accent);border-color:var(--accent);color:#12100b}
 
+@media(max-width:860px){
+  /* na uzem ekranu jedan red od 6-7 slika bi bio presitan - prelama se */
+  .gal{flex-wrap:wrap;gap:8px}
+  .gal-i{flex:1 1 calc(33.333% - 8px)}
+}
 @media(max-width:640px){
-  .gal{gap:8px;margin-bottom:18px}
-  .gal-i{height:76px}
+  .gal{margin-bottom:18px}
+  .gal-i{flex:1 1 calc(50% - 4px)}
   .lb-nav{width:42px;height:42px;font-size:24px}
   .lb-p{left:10px}
   .lb-n{right:10px}
