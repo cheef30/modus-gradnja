@@ -160,9 +160,51 @@ function jsonLd(u, isDZ, url) {
   return JSON.stringify(d, null, 2);
 }
 
+/* ------------------------------------------------- verzije fajlova ----
+   Server kesira CSS i JS godinu dana (Cache-Control: max-age=31536000).
+   Bez oznake verzije posetilac koji je vec bio na sajtu i dalje koristi
+   staru verziju stila, pa nova stranica dolazi sa starim izgledom.
+
+   Zato se uz svaki fajl upisuje kratak otisak njegovog sadrzaja:
+     styles.css  ->  styles.css?v=1a2b3c4d
+   Kad se fajl promeni, otisak se promeni, pregledac ga vidi kao nov i
+   povuce ga. Ako se ne promeni, kes i dalje radi svoj posao.           */
+var crypto = require('crypto');
+
+function otisak(fajl) {
+  var p = path.join(__dirname, fajl);
+  if (!fs.existsSync(p)) return null;
+  return crypto.createHash('md5').update(fs.readFileSync(p)).digest('hex').slice(0, 8);
+}
+
+/* Dodaje ?v=... svim lokalnim .css i .js referencama u datom HTML-u.
+   Postojeca oznaka se zamenjuje, pa je pokretanje bezbedno vise puta. */
+function upisiVerzije(html) {
+  return html.replace(
+    /((?:href|src)=")(?!https?:)([^"?]+\.(?:css|js))(?:\?v=[0-9a-f]+)?(")/g,
+    function (ceo, pre, putanja, posle) {
+      var v = otisak(putanja.replace(/^\//, ''));
+      return v ? pre + putanja + '?v=' + v + posle : ceo;
+    });
+}
+
 /* ------------------------------------------------------------- izgradnja */
 function build() {
   if (!fs.existsSync(OUT_DIR)) fs.mkdirSync(OUT_DIR);
+
+  /* oznake verzija u stranicama koje se ne generisu */
+  var osvezeno = [];
+  ['index.html', 'stan.html', '404.html'].forEach(function (f) {
+    var p = path.join(__dirname, f);
+    if (!fs.existsSync(p)) return;
+    var pre = fs.readFileSync(p, 'utf8');
+    var posle = upisiVerzije(pre);
+    if (posle !== pre) { fs.writeFileSync(p, posle); osvezeno.push(f); }
+  });
+  if (osvezeno.length) console.log('Verzije osvezene u: ' + osvezeno.join(', '));
+
+  /* sablon za stranice stanova mora da nosi iste oznake */
+  sablon = upisiVerzije(sablon);
 
   var svi = M.units.map(function (u) { return { u: u, dz: false }; })
     .concat(M.dz.units.map(function (u) { return { u: u, dz: true }; }));

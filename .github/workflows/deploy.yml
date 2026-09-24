@@ -44,19 +44,22 @@ jobs:
       # Ako neko zaboravi `node build-stanovi.js` pre commit-a, stranice u
       # stan/ nose stare podatke. Ovde se generisu ponovo i poredi - ako se
       # razlikuju, postavljanje se zaustavlja.
-      # Poredi se samo stan/ - sitemap.xml nosi <lastmod> sa datumom kad je
-      # generator pokrenut, pa bi se razlikovao pri svakom pushu u novom danu
-      # iako se sadrzaj nije promenio.
-      - name: Provera da su stranice regenerisane
+      # Sitemap.xml se ne poredi - nosi <lastmod> sa datumom kad je generator
+      # pokrenut, pa bi se razlikovao pri svakom pushu u novom danu iako se
+      # sadrzaj nije promenio.
+      - name: Provera da su stranice i oznake verzija sveze
         run: |
           node build-stanovi.js
-          if ! git diff --quiet -- stan/; then
-            echo "::error::Stranice u stan/ nisu usklađene sa podacima."
+          if ! git diff --quiet -- stan/ index.html stan.html 404.html; then
+            echo "::error::Generisani sadržaj nije usklađen sa izvorom."
             echo "Pokreni lokalno: node build-stanovi.js, pa commit-uj izmene."
-            git diff --stat -- stan/
+            echo "Najčešći uzrok: promenjen je styles.css ili neki .js, a oznake"
+            echo "verzija (?v=...) u HTML-u nisu osvežene - posetioci bi tada"
+            echo "nastavili da koriste staru verziju iz keša."
+            git diff --stat -- stan/ index.html stan.html 404.html
             exit 1
           fi
-          echo "Stranice su usklađene."
+          echo "Sve je usklađeno."
 
       # Sklapa se folder sa tacno onim sto ide na server.
       - name: Pripremi fajlove za slanje
