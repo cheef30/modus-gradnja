@@ -174,7 +174,11 @@ var crypto = require('crypto');
 function otisak(fajl) {
   var p = path.join(__dirname, fajl);
   if (!fs.existsSync(p)) return null;
-  return crypto.createHash('md5').update(fs.readFileSync(p)).digest('hex').slice(0, 8);
+  /* prelomi se izjednacavaju pre racunanja - inace bi Windows (\r\n) i
+     Linux (\n) davali razlicite otiske za isti fajl, pa bi provera u CI-ju
+     padala iako je sadrzaj isti */
+  var sadrzaj = fs.readFileSync(p, 'utf8').replace(/\r\n/g, '\n');
+  return crypto.createHash('md5').update(sadrzaj, 'utf8').digest('hex').slice(0, 8);
 }
 
 /* Dodaje ?v=... svim lokalnim .css i .js referencama u datom HTML-u.
