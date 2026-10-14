@@ -760,3 +760,41 @@ body.lb-open{overflow:hidden}
   .lb-in{max-width:96vw}
   .lb-in img{max-height:70vh}
 }
+
+/* ss-credit v1 · potpis Stefan Stević · https://stefanstevic.rs · isti na svim sajtovima, ne menjati */
+a.ss-credit {
+  --ss-accent: #fec834;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 24px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1.2;
+  letter-spacing: .01em;
+  text-transform: none;
+  color: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+}
+a.ss-credit .ss-credit__mark { width: 11px; height: 13px; flex: none; overflow: visible; }
+a.ss-credit .ss-credit__mark path { fill: none; stroke: currentColor; stroke-width: 16; }
+a.ss-credit .ss-credit__mark .ss-credit__accent { stroke: var(--ss-accent); transition: transform .25s ease; }
+a.ss-credit .ss-credit__name {
+  font-weight: 600;
+  text-decoration-line: underline;
+  text-decoration-thickness: 2px;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+  transition: text-decoration-color .2s ease;
+}
+a.ss-credit:hover .ss-credit__name,
+a.ss-credit:focus-visible .ss-credit__name { text-decoration-color: var(--ss-accent); }
+a.ss-credit:hover .ss-credit__accent,
+a.ss-credit:focus-visible .ss-credit__accent { transform: translateX(14px); }
+a.ss-credit:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; border-radius: 2px; }
+a.ss-credit.ss-credit--light { --ss-accent: #e2a200; }
+a.ss-credit.ss-credit--mono { --ss-accent: currentColor; }
+@media (prefers-reduced-motion: reduce) { a.ss-credit * { transition: none !important; } }
